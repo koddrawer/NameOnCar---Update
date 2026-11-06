@@ -20,3 +20,13 @@ MẸO
 - Tên đã viết được lưu lại khi tắt/mở app. Đầy xe thì tên cũ nhất bị xoá. "Rửa xe" để xoá hết.
 - App tự kiểm tra bản mới trên GitHub mỗi lần mở; hoặc bấm "Kiểm tra cập nhật" rồi "Khởi động lại".
 - Nếu tặng quà mà app không phản ứng: gửi file gift-debug.log trong "Thư mục dữ liệu" để mình chỉnh.
+
+BẢN 1.2 — SHOWROOM 5 XE
+- 5 xe (BMW X3, BMW 330i, Camaro, Porsche 911 GT3 RS, Bugatti Divo) đặt trong showroom. Lần đầu mở app tự tải ~46 MB model, các lần sau dùng lại.
+- Màn trên: góc nhìn người cầm bút (POV) đi bộ tới xe, có nhún bước/rung tay; lúc rảnh đi dạo ngắm xe.
+- Màn dưới: camera quay xe. Kéo chuột trái ở nửa dưới màn LIVE để xoay, chuột phải để dời, lăn để zoom,
+  rồi vào tab Camera bấm "Lưu góc hiện tại". Chọn chế độ: tự xoay / góc cố định / lần lượt các góc.
+- Tab Xe: bật/tắt xe, vị trí, góc xoay, màu sơn; "Thêm xe (.glb)" rồi bấm "Chọn…" để chọn vật liệu là lớp sơn.
+- Tab Chữ & Font: 25 font tiếng Việt có sẵn, chọn font riêng cho từng mốc; thêm font .ttf/.otf của bạn.
+- Tab Nhạc & Giọng: thêm nhiều bài nhạc nền; giọng đọc khi viết + lời cảm ơn (sửa câu tuỳ ý).
+  Giọng Edge AI (Hoài My / Nam Minh) cần mạng; lỗi sẽ tự chuyển Google rồi giọng Windows.

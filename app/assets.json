@@ -1,0 +1,38 @@
+[
+ {
+  "file": "showroom.glb",
+  "label": "Showroom",
+  "size": 2123084,
+  "sha256": "745ee232449b6d3706d3a491d278c24aa7cf1c77d78e63a2c0a2d0a3d75fd169"
+ },
+ {
+  "file": "x3.glb",
+  "label": "BMW X3",
+  "size": 7696292,
+  "sha256": "8bb4054af6232d9452b6815b47a33b4a476f0f9f6208543daafca0e267038670"
+ },
+ {
+  "file": "bmw330.glb",
+  "label": "BMW 330i",
+  "size": 15207088,
+  "sha256": "63fcd3b31b89a3b292bad314a30b282ddfb1a97bd91269c3af61137558d0521b"
+ },
+ {
+  "file": "camaro.glb",
+  "label": "Camaro",
+  "size": 10476544,
+  "sha256": "a349ec58c6ef8b70abc53b6582e7f5ab0ec63fd5804ea189e12d361a3af560f7"
+ },
+ {
+  "file": "porsche.glb",
+  "label": "Porsche 911",
+  "size": 5201276,
+  "sha256": "6dab26a74da32770c6cb0170f21967001ac15ef421dd0c1f8fdef2e5c679d42f"
+ },
+ {
+  "file": "bugatti.glb",
+  "label": "Bugatti Divo",
+  "size": 5486976,
+  "sha256": "7259af557abed660a6935d6736142b617938fe6ae5ca78716e7eac3386d567cb"
+ }
+]

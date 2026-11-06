@@ -1,0 +1,600 @@
+/* alex-brush-latin-400-normal */
+@font-face {
+  font-family: 'Alex Brush';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/alex-brush-latin-400-normal.woff2) format('woff2');
+}
+/* alex-brush-latin-ext-400-normal */
+@font-face {
+  font-family: 'Alex Brush';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/alex-brush-latin-ext-400-normal.woff2) format('woff2');
+}
+/* alex-brush-vietnamese-400-normal */
+@font-face {
+  font-family: 'Alex Brush';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/alex-brush-vietnamese-400-normal.woff2) format('woff2');
+}
+/* allura-latin-400-normal */
+@font-face {
+  font-family: 'Allura';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/allura-latin-400-normal.woff2) format('woff2');
+}
+/* allura-latin-ext-400-normal */
+@font-face {
+  font-family: 'Allura';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/allura-latin-ext-400-normal.woff2) format('woff2');
+}
+/* allura-vietnamese-400-normal */
+@font-face {
+  font-family: 'Allura';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/allura-vietnamese-400-normal.woff2) format('woff2');
+}
+/* baloo-2-latin-800-normal */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(files/baloo-2-latin-800-normal.woff2) format('woff2');
+}
+/* baloo-2-latin-ext-800-normal */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(files/baloo-2-latin-ext-800-normal.woff2) format('woff2');
+}
+/* baloo-2-vietnamese-800-normal */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(files/baloo-2-vietnamese-800-normal.woff2) format('woff2');
+}
+/* birthstone-latin-400-normal */
+@font-face {
+  font-family: 'Birthstone';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/birthstone-latin-400-normal.woff2) format('woff2');
+}
+/* birthstone-latin-ext-400-normal */
+@font-face {
+  font-family: 'Birthstone';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/birthstone-latin-ext-400-normal.woff2) format('woff2');
+}
+/* birthstone-vietnamese-400-normal */
+@font-face {
+  font-family: 'Birthstone';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/birthstone-vietnamese-400-normal.woff2) format('woff2');
+}
+/* bungee-latin-400-normal */
+@font-face {
+  font-family: 'Bungee';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/bungee-latin-400-normal.woff2) format('woff2');
+}
+/* bungee-latin-ext-400-normal */
+@font-face {
+  font-family: 'Bungee';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/bungee-latin-ext-400-normal.woff2) format('woff2');
+}
+/* bungee-vietnamese-400-normal */
+@font-face {
+  font-family: 'Bungee';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/bungee-vietnamese-400-normal.woff2) format('woff2');
+}
+/* charm-latin-700-normal */
+@font-face {
+  font-family: 'Charm';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/charm-latin-700-normal.woff2) format('woff2');
+}
+/* charm-latin-ext-700-normal */
+@font-face {
+  font-family: 'Charm';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/charm-latin-ext-700-normal.woff2) format('woff2');
+}
+/* charm-vietnamese-700-normal */
+@font-face {
+  font-family: 'Charm';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/charm-vietnamese-700-normal.woff2) format('woff2');
+}
+/* charmonman-latin-700-normal */
+@font-face {
+  font-family: 'Charmonman';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/charmonman-latin-700-normal.woff2) format('woff2');
+}
+/* charmonman-latin-ext-700-normal */
+@font-face {
+  font-family: 'Charmonman';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/charmonman-latin-ext-700-normal.woff2) format('woff2');
+}
+/* charmonman-vietnamese-700-normal */
+@font-face {
+  font-family: 'Charmonman';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/charmonman-vietnamese-700-normal.woff2) format('woff2');
+}
+/* comforter-latin-400-normal */
+@font-face {
+  font-family: 'Comforter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/comforter-latin-400-normal.woff2) format('woff2');
+}
+/* comforter-latin-ext-400-normal */
+@font-face {
+  font-family: 'Comforter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/comforter-latin-ext-400-normal.woff2) format('woff2');
+}
+/* comforter-vietnamese-400-normal */
+@font-face {
+  font-family: 'Comforter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/comforter-vietnamese-400-normal.woff2) format('woff2');
+}
+/* corinthia-latin-700-normal */
+@font-face {
+  font-family: 'Corinthia';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/corinthia-latin-700-normal.woff2) format('woff2');
+}
+/* corinthia-latin-ext-700-normal */
+@font-face {
+  font-family: 'Corinthia';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/corinthia-latin-ext-700-normal.woff2) format('woff2');
+}
+/* corinthia-vietnamese-700-normal */
+@font-face {
+  font-family: 'Corinthia';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/corinthia-vietnamese-700-normal.woff2) format('woff2');
+}
+/* dancing-script-latin-700-normal */
+@font-face {
+  font-family: 'Dancing Script';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/dancing-script-latin-700-normal.woff2) format('woff2');
+}
+/* dancing-script-latin-ext-700-normal */
+@font-face {
+  font-family: 'Dancing Script';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/dancing-script-latin-ext-700-normal.woff2) format('woff2');
+}
+/* dancing-script-vietnamese-700-normal */
+@font-face {
+  font-family: 'Dancing Script';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/dancing-script-vietnamese-700-normal.woff2) format('woff2');
+}
+/* ephesis-latin-400-normal */
+@font-face {
+  font-family: 'Ephesis';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/ephesis-latin-400-normal.woff2) format('woff2');
+}
+/* ephesis-latin-ext-400-normal */
+@font-face {
+  font-family: 'Ephesis';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/ephesis-latin-ext-400-normal.woff2) format('woff2');
+}
+/* ephesis-vietnamese-400-normal */
+@font-face {
+  font-family: 'Ephesis';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/ephesis-vietnamese-400-normal.woff2) format('woff2');
+}
+/* great-vibes-latin-400-normal */
+@font-face {
+  font-family: 'Great Vibes';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/great-vibes-latin-400-normal.woff2) format('woff2');
+}
+/* great-vibes-latin-ext-400-normal */
+@font-face {
+  font-family: 'Great Vibes';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/great-vibes-latin-ext-400-normal.woff2) format('woff2');
+}
+/* great-vibes-vietnamese-400-normal */
+@font-face {
+  font-family: 'Great Vibes';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/great-vibes-vietnamese-400-normal.woff2) format('woff2');
+}
+/* grey-qo-latin-400-normal */
+@font-face {
+  font-family: 'Grey Qo';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/grey-qo-latin-400-normal.woff2) format('woff2');
+}
+/* grey-qo-latin-ext-400-normal */
+@font-face {
+  font-family: 'Grey Qo';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/grey-qo-latin-ext-400-normal.woff2) format('woff2');
+}
+/* grey-qo-vietnamese-400-normal */
+@font-face {
+  font-family: 'Grey Qo';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/grey-qo-vietnamese-400-normal.woff2) format('woff2');
+}
+/* imperial-script-latin-400-normal */
+@font-face {
+  font-family: 'Imperial Script';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/imperial-script-latin-400-normal.woff2) format('woff2');
+}
+/* imperial-script-latin-ext-400-normal */
+@font-face {
+  font-family: 'Imperial Script';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/imperial-script-latin-ext-400-normal.woff2) format('woff2');
+}
+/* imperial-script-vietnamese-400-normal */
+@font-face {
+  font-family: 'Imperial Script';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/imperial-script-vietnamese-400-normal.woff2) format('woff2');
+}
+/* itim-latin-400-normal */
+@font-face {
+  font-family: 'Itim';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/itim-latin-400-normal.woff2) format('woff2');
+}
+/* itim-latin-ext-400-normal */
+@font-face {
+  font-family: 'Itim';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/itim-latin-ext-400-normal.woff2) format('woff2');
+}
+/* itim-vietnamese-400-normal */
+@font-face {
+  font-family: 'Itim';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/itim-vietnamese-400-normal.woff2) format('woff2');
+}
+/* lobster-latin-400-normal */
+@font-face {
+  font-family: 'Lobster';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/lobster-latin-400-normal.woff2) format('woff2');
+}
+/* lobster-latin-ext-400-normal */
+@font-face {
+  font-family: 'Lobster';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/lobster-latin-ext-400-normal.woff2) format('woff2');
+}
+/* lobster-vietnamese-400-normal */
+@font-face {
+  font-family: 'Lobster';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/lobster-vietnamese-400-normal.woff2) format('woff2');
+}
+/* mali-latin-700-normal */
+@font-face {
+  font-family: 'Mali';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/mali-latin-700-normal.woff2) format('woff2');
+}
+/* mali-latin-ext-700-normal */
+@font-face {
+  font-family: 'Mali';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/mali-latin-ext-700-normal.woff2) format('woff2');
+}
+/* mali-vietnamese-700-normal */
+@font-face {
+  font-family: 'Mali';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(files/mali-vietnamese-700-normal.woff2) format('woff2');
+}
+/* moon-dance-latin-400-normal */
+@font-face {
+  font-family: 'Moon Dance';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/moon-dance-latin-400-normal.woff2) format('woff2');
+}
+/* moon-dance-latin-ext-400-normal */
+@font-face {
+  font-family: 'Moon Dance';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/moon-dance-latin-ext-400-normal.woff2) format('woff2');
+}
+/* moon-dance-vietnamese-400-normal */
+@font-face {
+  font-family: 'Moon Dance';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/moon-dance-vietnamese-400-normal.woff2) format('woff2');
+}
+/* pacifico-latin-400-normal */
+@font-face {
+  font-family: 'Pacifico';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/pacifico-latin-400-normal.woff2) format('woff2');
+}
+/* pacifico-latin-ext-400-normal */
+@font-face {
+  font-family: 'Pacifico';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/pacifico-latin-ext-400-normal.woff2) format('woff2');
+}
+/* pacifico-vietnamese-400-normal */
+@font-face {
+  font-family: 'Pacifico';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/pacifico-vietnamese-400-normal.woff2) format('woff2');
+}
+/* pangolin-latin-400-normal */
+@font-face {
+  font-family: 'Pangolin';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/pangolin-latin-400-normal.woff2) format('woff2');
+}
+/* pangolin-latin-ext-400-normal */
+@font-face {
+  font-family: 'Pangolin';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/pangolin-latin-ext-400-normal.woff2) format('woff2');
+}
+/* pangolin-vietnamese-400-normal */
+@font-face {
+  font-family: 'Pangolin';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/pangolin-vietnamese-400-normal.woff2) format('woff2');
+}
+/* patrick-hand-latin-400-normal */
+@font-face {
+  font-family: 'Patrick Hand';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/patrick-hand-latin-400-normal.woff2) format('woff2');
+}
+/* patrick-hand-latin-ext-400-normal */
+@font-face {
+  font-family: 'Patrick Hand';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/patrick-hand-latin-ext-400-normal.woff2) format('woff2');
+}
+/* patrick-hand-vietnamese-400-normal */
+@font-face {
+  font-family: 'Patrick Hand';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/patrick-hand-vietnamese-400-normal.woff2) format('woff2');
+}
+/* pattaya-latin-400-normal */
+@font-face {
+  font-family: 'Pattaya';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/pattaya-latin-400-normal.woff2) format('woff2');
+}
+/* pattaya-latin-ext-400-normal */
+@font-face {
+  font-family: 'Pattaya';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/pattaya-latin-ext-400-normal.woff2) format('woff2');
+}
+/* pattaya-vietnamese-400-normal */
+@font-face {
+  font-family: 'Pattaya';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/pattaya-vietnamese-400-normal.woff2) format('woff2');
+}
+/* playball-latin-400-normal */
+@font-face {
+  font-family: 'Playball';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/playball-latin-400-normal.woff2) format('woff2');
+}
+/* playball-latin-ext-400-normal */
+@font-face {
+  font-family: 'Playball';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/playball-latin-ext-400-normal.woff2) format('woff2');
+}
+/* playball-vietnamese-400-normal */
+@font-face {
+  font-family: 'Playball';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/playball-vietnamese-400-normal.woff2) format('woff2');
+}
+/* sriracha-latin-400-normal */
+@font-face {
+  font-family: 'Sriracha';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/sriracha-latin-400-normal.woff2) format('woff2');
+}
+/* sriracha-latin-ext-400-normal */
+@font-face {
+  font-family: 'Sriracha';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/sriracha-latin-ext-400-normal.woff2) format('woff2');
+}
+/* sriracha-vietnamese-400-normal */
+@font-face {
+  font-family: 'Sriracha';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/sriracha-vietnamese-400-normal.woff2) format('woff2');
+}
+/* water-brush-latin-400-normal */
+@font-face {
+  font-family: 'Water Brush';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/water-brush-latin-400-normal.woff2) format('woff2');
+}
+/* water-brush-latin-ext-400-normal */
+@font-face {
+  font-family: 'Water Brush';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/water-brush-latin-ext-400-normal.woff2) format('woff2');
+}
+/* water-brush-vietnamese-400-normal */
+@font-face {
+  font-family: 'Water Brush';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(files/water-brush-vietnamese-400-normal.woff2) format('woff2');
+}
