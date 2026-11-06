@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Car Sign Live — Display</title>
+<style>
+  html,body{margin:0;height:100%;background:#05060a;overflow:hidden;font-family:"Segoe UI",Roboto,Arial,sans-serif;color:#fff}
+  #c{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .hud{position:fixed;left:0;right:0;pointer-events:none}
+  #top{top:0;padding:3.2vh 4vw 0;text-align:center}
+  #title{font-size:5.2vh;font-weight:900;letter-spacing:.06em;line-height:1;
+    background:linear-gradient(180deg,#fff7d6,#ffcf4d 55%,#c48a0c);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 .35vh .6vh rgba(0,0,0,.7))}
+  #legend{margin-top:1.4vh;display:flex;flex-wrap:wrap;gap:.7vh .8vh;justify-content:center}
+  #legend span{font-size:1.75vh;font-weight:700;padding:.55vh 1.2vh;border-radius:99px;background:rgba(10,12,20,.62);border:1px solid rgba(255,207,77,.45);white-space:nowrap}
+  #likers{position:fixed;left:2.5vw;top:22vh;display:flex;flex-direction:column;gap:.9vh;pointer-events:none}
+  .lk{display:flex;align-items:center;gap:1vh;background:rgba(10,12,20,.65);border-radius:99px;padding:.5vh 1.4vh .5vh .5vh;border:1px solid rgba(255,90,120,.4)}
+  .lk img{width:4.2vh;height:4.2vh;border-radius:50%;object-fit:cover}
+  .lkb{width:16vh}.lkn{font-size:1.5vh;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar{height:.9vh;border-radius:9px;background:rgba(255,255,255,.15);overflow:hidden;margin-top:.4vh}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#ff5f86,#ffb3c6);transition:width .4s}
+  .lk b{font-size:1.6vh;color:#ff9ab2}
+  #banner{bottom:7vh;left:50%;right:auto;transform:translate(-50%,3vh);opacity:0;transition:all .45s cubic-bezier(.2,.9,.3,1.2);
+    display:flex;align-items:center;gap:1.4vh;padding:1vh 2.6vh 1vh 1vh;border-radius:99px;background:rgba(10,12,20,.78);border:2px solid #ffcf4d;max-width:88vw}
+  #banner.show{opacity:1;transform:translate(-50%,0)}
+  #banner img{width:7vh;height:7vh;border-radius:50%;object-fit:cover;border:.3vh solid #fff}
+  #bName{font-size:3vh;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw}
+  #bTier{font-size:1.9vh;font-weight:700;opacity:.9}
+  #banner.t-silver{border-color:#dfe5ee;box-shadow:0 0 3vh rgba(220,230,255,.5)}
+  #banner.t-gold{border-color:#ffcf4d;box-shadow:0 0 4vh rgba(255,200,60,.7)}
+  #banner.t-logo{border-color:#ffcf4d;box-shadow:0 0 6vh rgba(255,200,60,.95);background:linear-gradient(90deg,rgba(80,10,20,.9),rgba(10,12,20,.9))}
+  #banner.t-like{border-color:#ff6b8f}
+  #queue{position:fixed;bottom:2.4vh;width:100%;text-align:center;font-size:1.7vh;font-weight:700;opacity:.75;pointer-events:none}
+  #pump{position:fixed;top:44vh;left:50%;transform:translate(-50%,-50%) scale(.8);opacity:0;transition:all .3s;text-align:center;pointer-events:none;
+    background:rgba(10,12,20,.75);border:2px solid #ff6b8f;border-radius:2vh;padding:1.6vh 3vh}
+  #pump.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  #pump .t{font-size:2.2vh;font-weight:800;color:#ffb3c6}#pumpName{font-size:2.8vh;font-weight:900;margin:.3vh 0 1vh}
+  #pump .bar{height:1.6vh;width:30vh}#pump .bar i{transition:none}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.4vh;opacity:.8}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="top" class="hud"><div id="title"></div><div id="legend"></div></div>
+<div id="likers"></div>
+<div id="pump"><div class="t">❤️ BƠM ĐẦY MỰC ❤️</div><div id="pumpName"></div><div class="bar"><i id="pumpBar"></i></div></div>
+<div id="banner" class="hud"><img id="bAvatar" alt=""><div><div id="bName"></div><div id="bTier"></div></div></div>
+<div id="queue"></div>
+<div id="loading">Đang khởi động…</div>
+<script src="dist/display.bundle.js"></script>
+</body>
+</html>

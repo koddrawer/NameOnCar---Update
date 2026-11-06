@@ -1,0 +1,53 @@
+{
+  "name": "car-sign-live",
+  "version": "1.1.0",
+  "description": "Ký tên người xem lên xe 3D cho TikTok LIVE",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "esbuild src/display.js --bundle --minify --outfile=dist/display.bundle.js",
+    "dist": "npm run build && electron-builder --win zip",
+    "release": "npm run build && python3 scripts/release.py"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "tiktok-live-connector": "^2.5.0"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "esbuild": "^0.24.0",
+    "three": "^0.169.0",
+    "three-mesh-bvh": "^0.8.3"
+  },
+  "productName": "Car Sign Live",
+  "build": {
+    "appId": "com.koddrawer.carsignlive",
+    "productName": "Car Sign Live",
+    "files": [
+      "main.js",
+      "core.js",
+      "preload.js",
+      "display.html",
+      "control.html",
+      "control.js",
+      "dist/display.bundle.js",
+      "car.glb",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "zip"
+      ],
+      "signAndEditExecutable": false
+    },
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "asarUnpack": [
+      "car.glb"
+    ]
+  }
+}

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Car Sign Live — Bảng điều khiển</title>
+<style>
+  :root{--bg:#11131a;--card:#1a1d27;--line:#2a2e3b;--tx:#e9ecf3;--mut:#8f96a8;--acc:#ffc94d;--ok:#3ad07a;--bad:#ff5a6e}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font:13px "Segoe UI",Roboto,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:2;background:#0c0e14;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px}
+  header h1{font-size:15px;margin:0;flex:1;color:var(--acc)}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--bad)}.dot.on{background:var(--ok)}
+  main{padding:12px 14px 30px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+  section h2{font-size:13px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+  .row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .row label{min-width:130px;color:var(--mut)}
+  input[type=text],input[type=number],textarea,select{background:#0e1016;color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
+  input[type=number]{width:80px} input[type=text]{flex:1;min-width:120px} textarea{width:100%;min-height:96px;resize:vertical}
+  input[type=range]{flex:1} input[type=color]{width:40px;height:28px;border:none;background:none;padding:0}
+  button{background:#262a37;color:var(--tx);border:1px solid #363b4c;border-radius:6px;padding:7px 11px;font:inherit;cursor:pointer}
+  button:hover{border-color:var(--acc)} button.pri{background:var(--acc);color:#1b1400;border-color:var(--acc);font-weight:700}
+  button.danger{border-color:#5a2630;color:#ff8b98}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .grid div{display:flex;flex-direction:column;gap:3px;color:var(--mut);font-size:11px}
+  .grid input{width:100%}
+  .tests{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  #log{height:180px;overflow:auto;background:#0b0c11;border-radius:6px;padding:6px 8px;font:12px Consolas,monospace;color:#b9c0d0;white-space:pre-wrap}
+  .stat{display:flex;gap:14px;color:var(--mut);font-size:12px}.stat b{color:var(--tx)}
+  .val{width:42px;text-align:right;color:var(--acc)}
+  small{color:var(--mut)}
+</style>
+</head>
+<body>
+<header><div class="dot" id="dot"></div><h1>🚗 Car Sign Live</h1><div class="stat"><span>👀 <b id="viewers">0</b></span><span>✍️ <b id="names">0</b> tên</span><span>⏳ <b id="qlen">0</b></span></div></header>
+<main>
+<section>
+  <h2>Kết nối TikTok LIVE</h2>
+  <div class="row"><input type="text" id="user" placeholder="username (không cần @)"><button class="pri" id="btnConn">Kết nối</button><button id="btnDis">Ngắt</button></div>
+  <div class="row"><label><input type="checkbox" data-k="autoConnect"> Tự kết nối khi mở app</label></div>
+  <div class="row"><small id="cur">Đang rảnh</small></div>
+</section>
+
+<section>
+  <h2>Mốc tim / xu</h2>
+  <div class="row"><label>Số tim để bơm mực</label><input type="number" data-k="likeThreshold" min="1"><label style="min-width:auto"><input type="checkbox" data-k="likeRepeat"> Cho ký lại khi đủ thêm</label></div>
+  <div class="grid">
+    <div>Avatar nhỏ (xu)<input type="number" data-k="tiers.small" min="1"></div>
+    <div>Avatar to<input type="number" data-k="tiers.big" min="1"></div>
+    <div>Mực bạc<input type="number" data-k="tiers.silver" min="1"></div>
+    <div>Mực vàng<input type="number" data-k="tiers.gold" min="1"></div>
+    <div>Logo cửa xe<input type="number" data-k="tiers.logo" min="1"></div>
+  </div>
+  <small>Quà combo được cộng dồn hết chuỗi rồi mới xét mốc. Quà ưu tiên chạy trước lượt tim.</small>
+</section>
+
+<section>
+  <h2>Thử nghiệm</h2>
+  <div class="row"><input type="text" id="testName" placeholder="Tên thử (để trống = ngẫu nhiên)"></div>
+  <div class="tests">
+    <button data-test="likes">❤️ +25 tim</button><button data-test="like">❤️ Đủ 100 tim</button><button data-test="small">🪙 1 xu</button>
+    <button data-test="big">🪙 5 xu</button><button data-test="silver">🥈 10 xu</button><button data-test="gold">🥇 30 xu</button>
+    <button data-test="logo">👑 100 xu</button><button id="prevLogo">👁 Xem vị trí logo</button><button data-cmd="clearQueue">⏹ Xoá hàng chờ</button>
+  </div>
+</section>
+
+<section>
+  <h2>Chữ & mực</h2>
+  <div class="row"><label>Tiêu đề</label><input type="text" data-k="title"></div>
+  <div class="row"><label>Bảng luật (mỗi dòng 1 ô)</label></div>
+  <textarea data-k="legend" data-list="1"></textarea>
+  <div class="row" style="margin-top:8px"><label>Font chữ ký</label><input type="text" data-k="font"><button id="pickFont">Chọn file font…</button></div>
+  <div class="row"><label>Độ đậm</label><select data-k="fontWeight"><option>400</option><option>700</option><option>900</option></select>
+    <label style="min-width:auto">Màu mực thường</label><input type="color" data-k="inkColor"></div>
+  <div class="row"><label>Cỡ chữ (m) theo mốc</label></div>
+  <div class="grid">
+    <div>Tim<input type="number" step="0.01" data-k="sizes.like"></div>
+    <div>1 xu<input type="number" step="0.01" data-k="sizes.small"></div>
+    <div>5 xu<input type="number" step="0.01" data-k="sizes.big"></div>
+    <div>Bạc<input type="number" step="0.01" data-k="sizes.silver"></div>
+    <div>Vàng<input type="number" step="0.01" data-k="sizes.gold"></div>
+  </div>
+  <div class="row" style="margin-top:8px"><label>Avatar = cỡ chữ ×</label></div>
+  <div class="grid">
+    <div></div>
+    <div>1 xu<input type="number" step="0.1" data-k="avatarScale.small"></div>
+    <div>5 xu<input type="number" step="0.1" data-k="avatarScale.big"></div>
+    <div>Bạc<input type="number" step="0.1" data-k="avatarScale.silver"></div>
+    <div>Vàng<input type="number" step="0.1" data-k="avatarScale.gold"></div>
+  </div>
+</section>
+
+<section>
+  <h2>Logo cửa xe (100 xu)</h2>
+  <div class="row"><label>Bên xe</label><select data-k="logo.side" data-num="1"><option value="1">Bên trái (cửa tài phụ)</option><option value="-1">Bên phải</option></select></div>
+  <div class="row"><label>Trước ↔ sau</label><input type="range" min="-0.4" max="0.4" step="0.01" data-k="logo.along"><span class="val" data-v="logo.along"></span></div>
+  <div class="row"><label>Cao ↕ thấp</label><input type="range" min="0.1" max="0.6" step="0.01" data-k="logo.height"><span class="val" data-v="logo.height"></span></div>
+  <div class="row"><label>Kích thước (m)</label><input type="range" min="0.3" max="1.1" step="0.01" data-k="logo.size"><span class="val" data-v="logo.size"></span></div>
+</section>
+
+<section>
+  <h2>Khung hình & hiệu năng</h2>
+  <div class="row"><label>Tốc độ viết</label><input type="range" min="0.4" max="3" step="0.1" data-k="writeSpeed"><span class="val" data-v="writeSpeed"></span></div>
+  <div class="row"><label>Giữ cảnh sau khi viết (s)</label><input type="range" min="0" max="6" step="0.1" data-k="holdSeconds"><span class="val" data-v="holdSeconds"></span></div>
+  <div class="row"><label>Tốc độ xoay chờ</label><input type="range" min="0" max="4" step="0.1" data-k="orbitSpeed"><span class="val" data-v="orbitSpeed"></span></div>
+  <div class="row"><label>Khoảng cách camera chờ</label><input type="range" min="0.6" max="1.6" step="0.05" data-k="orbitZoom"><span class="val" data-v="orbitZoom"></span></div>
+  <div class="row"><label>Tối đa số tên trên xe</label><input type="number" data-k="maxNames" min="5"><small>Đầy thì xoá tên cũ nhất</small></div>
+  <div class="row"><label>Độ nét render</label><select data-k="renderScale" data-num="1"><option value="0.75">0.75 (máy yếu)</option><option value="1">1.0</option><option value="1.5">1.5</option><option value="2">2.0 (GPU mạnh)</option></select></div>
+  <div class="row"><label>Màu xe</label><input type="color" id="carColor"><label style="min-width:auto"><input type="checkbox" id="carOrig"> Giữ màu gốc</label></div>
+  <div class="row"><label>Nền trên / dưới</label><input type="color" data-k="bgTop"><input type="color" data-k="bgBottom"></div>
+  <div class="row"><label><input type="checkbox" data-k="sound"> Âm thanh bút + chuông</label></div>
+  <div class="row"><button id="pickCar">Đổi model xe (.glb)…</button><label style="min-width:auto">Tên vật liệu sơn</label><input type="text" data-k="paintMaterial"></div>
+</section>
+
+<section>
+  <h2>Quản lý</h2>
+  <div class="row"><small id="ver">Phiên bản …</small><button id="btnUpd">⬇️ Kiểm tra cập nhật</button><button id="btnRestart" style="display:none" class="pri">↻ Khởi động lại</button></div>
+  <div class="row"><button data-cmd="removeLast">↩ Xoá tên vừa viết</button><button class="danger" id="wash">🧽 Rửa xe (xoá hết)</button><button data-cmd="reload">⟳ Tải lại màn hình</button><button id="openData">📂 Thư mục dữ liệu</button></div>
+  <div id="log"></div>
+</section>
+</main>
+<script src="control.js"></script>
+</body>
+</html>

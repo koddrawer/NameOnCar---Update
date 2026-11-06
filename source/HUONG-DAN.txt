@@ -1,0 +1,22 @@
+CAR SIGN LIVE — Ký tên người xem lên xe 3D (TikTok LIVE)
+
+CHẠY
+1. Giải nén, mở "Car Sign Live.exe". Hiện 2 cửa sổ: Màn hình LIVE (9:16) và Bảng điều khiển.
+2. Bảng điều khiển → nhập username TikTok (không cần @) → Kết nối (phải đang LIVE).
+3. Trong TikTok LIVE Studio: thêm nguồn "Window Capture" → chọn cửa sổ "Car Sign Live — Màn hình LIVE".
+   Kéo to cửa sổ (luôn giữ tỉ lệ 9:16) để hình nét hơn.
+
+LUẬT MẶC ĐỊNH (sửa được trong Bảng điều khiển)
+- 100 tim (cộng dồn mỗi người): bơm đầy mực → ký tên mực thường
+- 1 xu: avatar nhỏ + tên      - 5 xu: avatar to + tên
+- 10 xu: avatar + tên mực bạc - 30 xu: avatar + tên mực ánh vàng
+- 100 xu: in avatar lên logo lớn ở cửa xe (người mới thay người cũ)
+Quà combo (hoa hồng x5...) được cộng hết chuỗi rồi mới xét mốc. Quà luôn được viết trước lượt tim.
+
+MẸO
+- Font chữ ký: gõ tên font đã cài trong Windows, hoặc "Chọn file font…" (.ttf/.otf). Nên chọn font có dấu tiếng Việt.
+- "Xem vị trí logo" để chỉnh vị trí logo cửa xe bằng thanh trượt.
+- Máy yếu (GTX 1050...): Độ nét render = 0.75.
+- Tên đã viết được lưu lại khi tắt/mở app. Đầy xe thì tên cũ nhất bị xoá. "Rửa xe" để xoá hết.
+- App tự kiểm tra bản mới trên GitHub mỗi lần mở; hoặc bấm "Kiểm tra cập nhật" rồi "Khởi động lại".
+- Nếu tặng quà mà app không phản ứng: gửi file gift-debug.log trong "Thư mục dữ liệu" để mình chỉnh.

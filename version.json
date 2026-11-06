@@ -1,0 +1,31 @@
+{
+  "version": "1.1.0",
+  "minBase": "1.0.0",
+  "notes": "Bản đầu tiên có cập nhật nóng",
+  "files": [
+    {
+      "path": "core.js",
+      "sha256": "52f0d110559d69b7b0f5d7f26f3baf3459fd6276c02b2915008988ff99373ebd"
+    },
+    {
+      "path": "preload.js",
+      "sha256": "5787edffdfbab6dd62702181c2d8cffe846db9673bb2e50d4a0bfb7b3e0ea857"
+    },
+    {
+      "path": "display.html",
+      "sha256": "70df30a8c32828da89df721a0344148230fb35a73736bc0df47c0e8ff0c03973"
+    },
+    {
+      "path": "control.html",
+      "sha256": "90eb0a6a175a553719e2941da5012f8196457de29770b434b2d16ec36e471851"
+    },
+    {
+      "path": "control.js",
+      "sha256": "fc787232cf1a59c0489cc7768ebd36fd62ba1f5e1ec88a8c51c83778af25cec0"
+    },
+    {
+      "path": "dist/display.bundle.js",
+      "sha256": "43fc7779e2dfccd6dc7b84639d355500f8f5158adb96cca955ae3f5b7a40ffa7"
+    }
+  ]
+}
