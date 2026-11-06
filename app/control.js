@@ -96,12 +96,15 @@ function renderCams() {
   $('camList').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { const p = [...list]; p.splice(+b.dataset.rm, 1); A.setConfig({ bot: { presets: p, preset: 0 } }).then(c => { cfg = c; fill(); }); });
   $('camList').querySelectorAll('[data-up]').forEach(b => b.onclick = () => { const i = +b.dataset.up; if (!i) return; const p = [...list];[p[i - 1], p[i]] = [p[i], p[i - 1]]; A.setConfig({ bot: { presets: p } }).then(c => { cfg = c; fill(); }); });
 }
+$('lkReset').onclick = () => A.setConfig({ likersBox: { x: 0.025, y: 0.2, scale: 0.75 } }).then(c => { cfg = c; fill(); });
 $('saveCam').onclick = () => { A.command({ cmd: 'saveCam', name: $('camName').value.trim() }); $('camName').value = ''; };
 $('botAuto').onclick = () => A.command({ cmd: 'botAuto' });
 
 // ---------- FONT ----------
 function renderFonts() {
-  $('fontRows').innerHTML = TIERS.map(([t, l]) => `<div class="row"><label style="min-width:80px">${l}</label><select data-font="${t}">${fontLib.map(f => `<option ${cfg.fonts?.[t] === f ? 'selected' : ''}>${esc(f)}</option>`).join('')}</select><div class="fprev" style="font-family:'${esc(cfg.fonts?.[t] || '')}'">Nguyễn Văn Ánh</div></div>`).join('');
+  const groups = [...new Set(fontLib.map(f => f.group))];
+  const opts = t => groups.map(g => `<optgroup label="${esc(g)}">${fontLib.filter(f => f.group === g).map(f => `<option ${cfg.fonts?.[t] === f.family ? 'selected' : ''}>${esc(f.family)}</option>`).join('')}</optgroup>`).join('');
+  $('fontRows').innerHTML = TIERS.map(([t, l]) => `<div class="row"><label style="min-width:80px">${l}</label><select data-font="${t}">${opts(t)}</select><div class="fprev" style="font-family:'${esc(cfg.fonts?.[t] || '')}'">Nguyễn Văn Ánh</div></div>`).join('');
   $('fontRows').querySelectorAll('[data-font]').forEach(s => s.onchange = () => { queueSave({ fonts: { [s.dataset.font]: s.value } }); s.nextElementSibling.style.fontFamily = `'${s.value}'`; });
   $('userFonts').innerHTML = (cfg.userFonts || []).map(f => `<div class="it"><span>${esc(f.family)}</span><button class="sm danger" data-rf="${esc(f.family)}">✕</button></div>`).join('');
   $('userFonts').querySelectorAll('[data-rf]').forEach(b => b.onclick = async () => { await A.removeFont(b.dataset.rf); await refreshFonts(); });
@@ -144,6 +147,7 @@ A.onStatus(s => {
   if ('viewers' in s) $('viewers').textContent = s.viewers;
   if ('names' in s) $('names').textContent = s.names;
   if (s.queue) $('qlen').textContent = s.queue.length;
+  if (s.size) $('dispSize').textContent = s.size;
   if (s.music !== undefined) $('nowPlaying').textContent = s.music ? '▶ ' + s.music : '';
   if ('current' in s) $('cur').textContent = s.current ? `Đang viết: ${s.current.name} (${TL[s.current.type]})` : 'Đang rảnh';
 });
@@ -160,3 +164,21 @@ $('btnUpd').onclick = async () => {
 $('btnRestart').onclick = () => A.restart();
 
 (async () => { cfg = await A.getConfig(); fontLib = await A.getFontLib(); bindFields(); fill(); showVer(); })();
+
+// ---------- trạng thái kết nối ----------
+const ST = { off: '⚪ Chưa kết nối', connecting: '🟡 Đang kết nối…', live: '🟢 Đang nhận sự kiện', reconnecting: '🟠 Đang nối lại…', waiting: '🟡 Chờ tài khoản lên LIVE…', error: '🔴 Lỗi cấu hình' };
+const ago = ms => ms < 1000 ? 'vừa xong' : ms < 60000 ? Math.round(ms / 1000) + ' giây' : Math.round(ms / 60000) + ' phút';
+const dur = ms => { const m = Math.floor(ms / 60000); return m >= 60 ? Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0') : m + ' phút'; };
+A.onConnStats(c => {
+  const now = c.now;
+  $('connStats').innerHTML = `
+    <div class="wide"><b>${ST[c.state] || c.state}</b>${c.mode === 'euler' ? 'Euler Stream WebSocket' : 'TikTok-Live-Connector'}${c.user ? ' · @' + esc(c.user) : ''}${c.lastError && c.state !== 'live' ? ' · ' + esc(c.lastError) : ''}</div>
+    <div><b>${c.state === 'live' ? dur(now - c.since) : '—'}</b>giữ kết nối liên tục</div>
+    <div><b>${c.lastEvent ? ago(now - c.lastEvent) : '—'}</b>sự kiện gần nhất</div>
+    <div><b>${c.reconnects}</b>lần tự nối lại</div>
+    <div><b>${c.events}</b>sự kiện</div><div><b>${c.gifts}</b>quà</div><div><b>${c.likes}</b>lượt tim</div>`;
+});
+function connRows() { const e = (cfg.conn?.mode === 'euler'); $('rowEuler').style.display = e ? '' : 'none'; $('rowSign').style.display = e ? 'none' : ''; }
+document.querySelector('[data-k="conn.mode"]').addEventListener('change', () => setTimeout(connRows, 50));
+$('showKey').onclick = () => { const i = document.querySelector('[data-k="conn.eulerKey"]'); i.type = i.type === 'password' ? 'text' : 'password'; };
+setTimeout(connRows, 600);

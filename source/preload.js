@@ -27,5 +27,5 @@ contextBridge.exposeInMainWorld('api', {
   appInfo: () => ipcRenderer.invoke('appInfo'),
   checkUpdate: () => ipcRenderer.invoke('checkUpdate'),
   restart: () => ipcRenderer.invoke('restart'),
-  onLog: sub('log'), onStatus: sub('status'), onConfigChanged: sub('configChanged'),
+  onLog: sub('log'), onConnStats: sub('connStats'), onStatus: sub('status'), onConfigChanged: sub('configChanged'),
 });

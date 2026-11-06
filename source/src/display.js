@@ -35,6 +35,7 @@ let CFG = {
   voice: { enabled: true, volume: 1, write: {}, thank: {} },
   renderScale: 1,
   likeThreshold: 100,
+  likersBox: { show: true, x: 0.025, y: 0.2, scale: 0.75, rows: 3 },
 };
 const TIERS = ['like', 'small', 'big', 'silver', 'gold', 'logo'];
 
@@ -62,7 +63,8 @@ const camBot = new THREE.PerspectiveCamera(40, 1, 0.05, 200);
 const cars = [];                 // {def, group, inner, decalGroup, paintMeshes, paintSet, allMeshes, lbPaint, lbAll, decals:[]}
 const carById = id => cars.find(c => c.def.id === id);
 let showroom = null, roomHalf = 13.2;
-let logoDecal = null;
+const logos = {};                 // side (1 | -1) -> decal logo; in cửa này trước rồi sang cửa kia
+const logoList = () => Object.values(logos);
 const queue = []; let busy = false; let current = null; let ready = false;
 const raycaster = new THREE.Raycaster(); raycaster.firstHitOnly = true;
 
@@ -84,11 +86,37 @@ function showBanner(job, carName) {
   $('bTier').textContent = (TIER_LABEL[job.type] || '') + (carName ? ' · ' + carName : '');
 }
 function updateQueueHUD() { $('queue').textContent = queue.length ? `Đang chờ: ${queue.length}` : ''; }
+let lastLikers = [];
 function setLikers(list) {
-  $('likers').innerHTML = (list || []).slice(0, 3).map(l => {
+  lastLikers = list || [];
+  const LB = CFG.likersBox || {}; const el = $('lkList'); $('likers').style.display = LB.show === false ? 'none' : '';
+  $('lkHead').textContent = `❤️ ${CFG.likeThreshold} tim = ký tên lên xe`;
+  el.innerHTML = lastLikers.slice(0, LB.rows || 3).map(l => {
     const pct = Math.min(100, Math.round(l.count / CFG.likeThreshold * 100));
     return `<div class="lk"><img src="${l.avatar ? esc(l.avatar) : initialsAvatar(l.name)}"><div class="lkb"><div class="lkn">${esc(l.name)}</div><div class="bar"><i style="width:${pct}%"></i></div></div><b>${pct}%</b></div>`;
   }).join('');
+}
+// ---- bảng tim: popup kéo thả + đổi cỡ ----
+function placeLikers() {
+  const LB = CFG.likersBox || {}; const el = $('likers');
+  el.style.left = (LB.x ?? 0.025) * 100 + '%'; el.style.top = (LB.y ?? 0.2) * 100 + '%'; el.style.setProperty('--ls', LB.scale ?? 0.75);
+}
+{
+  const el = $('likers'); let d = null;
+  const save = () => { clearTimeout(el._t); el._t = setTimeout(() => api.setConfig && api.setConfig({ likersBox: CFG.likersBox }), 300); };
+  el.addEventListener('pointerdown', e => {
+    e.stopPropagation(); el.setPointerCapture(e.pointerId);
+    const LB = CFG.likersBox = { ...(CFG.likersBox || {}) };
+    d = { resize: e.target.id === 'lkResize', x: e.clientX, y: e.clientY, lx: LB.x ?? 0.025, ly: LB.y ?? 0.2, s: LB.scale ?? 0.75 };
+  });
+  el.addEventListener('pointermove', e => {
+    if (!d) return; const LB = CFG.likersBox, W = window.innerWidth, H = window.innerHeight;
+    if (d.resize) LB.scale = Math.min(2.5, Math.max(0.35, d.s + (e.clientX - d.x + e.clientY - d.y) / 300));
+    else { LB.x = Math.min(0.95, Math.max(0, d.lx + (e.clientX - d.x) / W)); LB.y = Math.min(0.97, Math.max(0, d.ly + (e.clientY - d.y) / H)); }
+    placeLikers();
+  });
+  el.addEventListener('pointerup', () => { if (d) save(); d = null; });
+  el.addEventListener('wheel', e => { e.preventDefault(); e.stopPropagation(); const LB = CFG.likersBox = { ...(CFG.likersBox || {}) }; LB.scale = Math.min(2.5, Math.max(0.35, (LB.scale ?? 0.75) * (e.deltaY > 0 ? 0.93 : 1.07))); placeLikers(); save(); }, { passive: false });
 }
 function setCamLabel(t) { $('camLabel').textContent = t ? '📷 ' + t : ''; }
 
@@ -508,14 +536,14 @@ function toLocal(car, v) { return car.group.worldToLocal(v.clone()); }
 function overlaps(car, pW, radius) {
   const pl = toLocal(car, pW);
   for (const d of car.decals) if (d.centerL.distanceTo(pl) < (d.radius + radius) * 0.92) return true;
-  if (CFG.logo.car === car.def.id) { const lr = reservedLogo(); if (lr && toLocal(car, lr.p).distanceTo(pl) < CFG.logo.size * 0.62 + radius) return true; }
+  if (CFG.logo.car === car.def.id) for (const lr of reservedLogo()) if (toLocal(car, lr.p).distanceTo(pl) < CFG.logo.size * 0.62 + radius) return true;
   return false;
 }
 function sampleOrigin(car) {
   const b = car.lbPaint, c = b.getCenter(V3()), s = b.getSize(V3()); const r = Math.random();
   let o, d;
   if (r < 0.74) { const side = Math.random() < 0.5 ? 1 : -1; o = V3(c.x + side * (s.x / 2 + 3), b.min.y + s.y * (0.12 + Math.random() * 0.5), c.z + (Math.random() - 0.5) * s.z * 0.92); d = V3(-side, 0, 0); }
-  else if (r < 0.86) { o = V3(c.x + (Math.random() - 0.5) * s.x * 0.7, b.max.y + 3, c.z + (Math.random() - 0.5) * s.z * 0.9); d = V3(0, -1, 0); }
+  else if (r < 0.86) { const e = Math.random() < 0.5 ? 1 : -1; o = V3(c.x + (Math.random() - 0.5) * s.x * 0.6, b.max.y + 3, c.z + e * s.z * (0.25 + Math.random() * 0.22)); d = V3(0, -1, 0); }   // chỉ capo / cốp, không lên nóc
   else { const e = Math.random() < 0.5 ? 1 : -1; o = V3(c.x + (Math.random() - 0.5) * s.x * 0.7, b.min.y + s.y * (0.2 + Math.random() * 0.4), c.z + e * (s.z / 2 + 3)); d = V3(0, 0, -e); }
   return { o: o.applyMatrix4(car.group.matrixWorld), d: d.transformDirection(car.group.matrixWorld) };
 }
@@ -525,12 +553,21 @@ function findSlotOnce(car, w, h, tries) {
     const { o, d } = sampleOrigin(car);
     const hit = hitPaint(car, o, d); if (!hit || Math.abs(hit.n.dot(d)) < 0.55) continue;
     if (overlaps(car, hit.point, radius)) continue;
+    if (hit.n.y > 0.55 && toLocal(car, hit.point).y > car.lbPaint.min.y + car.lbPaint.getSize(V3()).y * 0.78) continue;   // nóc xe
     const st = standFor(car, hit.point, hit.n, w, h); if (!st) continue;
+    if (hit.n.dot(st.cam.clone().sub(hit.point).normalize()) < 0.5) continue;           // nhìn quá xiên -> chữ khó đọc
+    if (occluded(car, st.cam, hit.point)) continue;                                   // bị gương / cánh gió che
     const { X, Y } = basisFor(hit.point, hit.n, st.cam);
     if (!surfaceOK(car, hit.point, hit.n, X, Y, w, h)) continue;
     return { car, p: hit.point, n: hit.n, X, Y, stand: st };
   }
   return null;
+}
+function occluded(car, eye, p) {
+  const dir = p.clone().sub(eye); const dist = dir.length(); dir.normalize();
+  raycaster.set(eye, dir); raycaster.far = dist + 0.05;
+  const h = raycaster.intersectObjects(car.allMeshes, false)[0];
+  return !!h && h.distance < dist - 0.04;
 }
 function pickCars() {
   const list = activeCars().slice().sort((a, b) => a.decals.length - b.decals.length + (Math.random() - 0.5) * 3);
@@ -547,10 +584,13 @@ function findSlot(w, h) {
   return null;
 }
 let _lr = null, _lrKey = '';
-function reservedLogo() { const k = JSON.stringify(CFG.logo) + cars.length; if (k !== _lrKey) { _lrKey = k; _lr = logoSlot(); } return _lr; }
-function logoSlot() {
+function reservedLogo() { const k = JSON.stringify(CFG.logo) + cars.length; if (k !== _lrKey) { _lrKey = k; _lr = logoSides().map(sd => logoSlot(sd)).filter(Boolean); } return _lr; }
+function logoSides() { const a = CFG.logo.side >= 0 ? 1 : -1; return [a, -a]; }
+// cửa trống đầu tiên; cả 2 cửa đã có người thì thay người cũ nhất
+function pickLogoSide() { const sides = logoSides(); const freeSide = sides.find(sd => !logos[sd]); return freeSide !== undefined ? freeSide : sides.reduce((a, b) => (logos[a].t <= logos[b].t ? a : b)); }
+function logoSlot(sideArg) {
   const car = carById(CFG.logo.car) || cars[0]; if (!car) return null;
-  const b = car.lbPaint, c = b.getCenter(V3()), s = b.getSize(V3()); const sd = CFG.logo.side >= 0 ? 1 : -1;
+  const b = car.lbPaint, c = b.getCenter(V3()), s = b.getSize(V3()); const sd = sideArg !== undefined ? sideArg : (CFG.logo.side >= 0 ? 1 : -1);
   const o = V3(c.x + sd * (s.x / 2 + 3), b.min.y + s.y * CFG.logo.height, c.z + s.z * CFG.logo.along).applyMatrix4(car.group.matrixWorld);
   const d = V3(-sd, 0, 0).transformDirection(car.group.matrixWorld);
   const hit = hitPaint(car, o, d); if (!hit) return null;
@@ -609,7 +649,7 @@ function removeOldest() {
   return true;
 }
 function enforceMax() { while (allDecals().length > CFG.maxNames) if (!removeOldest()) break; }
-function clearAll() { cars.forEach(c => { c.decals.splice(0).forEach(disposeEntry); }); if (logoDecal) { disposeEntry(logoDecal); logoDecal = null; } }
+function clearAll() { cars.forEach(c => { c.decals.splice(0).forEach(disposeEntry); }); for (const k of Object.keys(logos)) { disposeEntry(logos[k]); delete logos[k]; } }
 function slotToLocal(s) { const c = s.car, m = c.group.matrixWorld.clone().invert(); return { car: c.def.id, scale: s.scale || 1, p: s.p.clone().applyMatrix4(m).toArray(), n: s.n.clone().transformDirection(m).toArray(), X: s.X.clone().transformDirection(m).toArray(), Y: s.Y.clone().transformDirection(m).toArray() }; }
 function slotFromLocal(o) {
   const car = carById(o.car || 'x3'); if (!car) return null; const m = car.group.matrixWorld;
@@ -857,19 +897,20 @@ async function runLogo(job, instant = false, rec = null) {
   const fam = (rec && rec.font) || CFG.fonts.logo || 'Pacifico';
   try { await document.fonts.load(fontStr(80, fam), job.name); } catch (e) { }
   const img = await loadImg(job.avatar || initialsAvatar(job.name));
-  const slot = logoSlot(); if (!slot) { console.warn('Không tìm thấy vị trí logo'); return; }
+  const side = rec && rec.side !== undefined && !logos[rec.side] ? rec.side : pickLogoSide();
+  const slot = logoSlot(side); if (!slot) { console.warn('Không tìm thấy vị trí logo'); return; }
   const car = slot.car; const R = revealer(makeLogoCanvas(img, job.name, fam)); const size = CFG.logo.size;
-  const old = logoDecal; const d = buildDecal(car, slot, slot.p, size, size, R.tex, 'logo');
+  const old = logos[side]; const d = buildDecal(car, slot, slot.p, size, size, R.tex, 'logo');
   const recOut = rec || { id: job.id, type: 'logo', name: job.name, avatar: job.avatar || '', font: fam, t: Date.now() };
-  const entry = { id: recOut.id, car, groups: [d.group], mats: [d.mat], kind: 'logo', shine: true };
-  if (instant) { R.full(); if (old) disposeEntry(old); logoDecal = entry; return; }
+  const entry = { id: recOut.id, car, groups: [d.group], mats: [d.mat], kind: 'logo', shine: true, side, t: recOut.t || 0, name: job.name };
+  if (instant) { R.full(); if (old) { disposeEntry(old); api.removeRecord && api.removeRecord(old.id); } logos[side] = entry; return; }
   R.scan(0);
   current.slot = slot; job.carName = car.def.name; showBanner(job, car.def.name);
   say(fillTpl(CFG.voice.write.logo, job));
   await povGo(slot.stand.feet, slot.p.clone(), slot.stand.eye);
   zoomTo(size * 1.25, slot.p);
   for (const e of [...car.decals]) if (e.centerL.distanceTo(toLocal(car, slot.p)) < size * 0.62 + e.radius * 0.8) { car.decals.splice(car.decals.indexOf(e), 1); api.removeRecord && api.removeRecord(e.id); disposeEntry(e); }
-  if (old) { await animate(0.6, k => old.mats.forEach(m => m.opacity = 1 - k)); disposeEntry(old); }
+  if (old) { api.removeRecord && api.removeRecord(old.id); await animate(0.6, k => old.mats.forEach(m => m.opacity = 1 - k)); disposeEntry(old); }
   const barG = new THREE.Group();
   barG.add(new THREE.Mesh(new THREE.PlaneGeometry(size * 1.08, size * 0.025), new THREE.MeshBasicMaterial({ color: 0xfff1b0, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false })),
     new THREE.Mesh(new THREE.PlaneGeometry(size * 1.2, size * 0.12), new THREE.MeshBasicMaterial({ map: radialTex([[0, 'rgba(255,220,120,0.9)'], [1, 'rgba(255,200,80,0)']]), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })));
@@ -877,9 +918,9 @@ async function runLogo(job, instant = false, rec = null) {
   chime('silver'); startScribble();
   await animate(3.2 / Math.max(0.3, CFG.writeSpeed), k => { R.scan(k); barG.position.copy(slot.p).addScaledVector(slot.Y, (0.5 - k) * size).addScaledVector(slot.n, 0.03); scribbleLevel(0.35 + 0.2 * Math.sin(k * 80)); });
   stopScribble(); scene.remove(barG); R.full();
-  logoDecal = entry; chime('logo');
+  logos[side] = entry; chime('logo');
   for (let i = 0; i < 3; i++) setTimeout(() => burst(slot.p.clone().addScaledVector(slot.n, 0.05), slot.n, i % 2 ? 0xffffff : 0xffc83a, 160, size * 1.3), i * 350);
-  api.saveRecord && api.saveRecord({ ...recOut, car: car.def.id });
+  api.saveRecord && api.saveRecord({ ...recOut, car: car.def.id, side });
   say(fillTpl(CFG.voice.thank.logo, job));
   await wait((CFG.holdSeconds + 1.5) * 1000);
 }
@@ -890,20 +931,21 @@ function enqueue(job) {
   if (job.type !== 'like') { let i = queue.findIndex(j => j.type === 'like'); if (i < 0) i = queue.length; queue.splice(i, 0, job); } else queue.push(job);
   updateQueueHUD(); report();
 }
-function report() { api.status && api.status({ queue: queue.map(j => ({ type: j.type, name: j.name })), current: current && { type: current.type, name: current.name }, names: allDecals().length, logo: logoDecal ? 'có' : '' }); }
+function report() { api.status && api.status({ queue: queue.map(j => ({ type: j.type, name: j.name })), current: current && { type: current.type, name: current.name }, names: allDecals().length, logo: logoList().map(l => l.name).join(', ') }); }
 
 // ================= LOOP =================
 let last = performance.now(), perfT = 0;
 function resize() {
-  renderer.setPixelRatio(CFG.renderScale || 1);
+  renderer.setPixelRatio((window.devicePixelRatio || 1) * (CFG.renderScale || 1));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
+  api.status && api.status({ size: Math.round(window.innerWidth * (window.devicePixelRatio || 1)) + '×' + Math.round(window.innerHeight * (window.devicePixelRatio || 1)) });
 }
 window.addEventListener('resize', resize);
 function frame(now) {
   const dt = Math.min(window.__DTCAP || 0.05, (now - last) / 1000); last = now; perfT += dt;
   runTickers(dt); updateBursts(dt); updatePOV(dt, perfT); updateBot(dt);
   for (const c of cars) for (const d of c.decals) if (d.shine) d.mats.forEach(m => { if (m.emissiveMap) m.emissiveIntensity = (d.kind === 'gold' ? 0.12 : 0.04) + Math.max(0, Math.sin(perfT * 2.2 + d.centerL.x * 3 + d.centerL.z)) * (d.kind === 'gold' ? 0.35 : 0.2); });
-  if (logoDecal) logoDecal.mats.forEach(m => m.emissiveIntensity = 0.06 + Math.max(0, Math.sin(perfT * 1.6)) * 0.22);
+  for (const lg of logoList()) lg.mats.forEach(m => m.emissiveIntensity = 0.06 + Math.max(0, Math.sin(perfT * 1.6)) * 0.22);
   const W = window.innerWidth, H = window.innerHeight, hTop = Math.round(H * CFG.split);
   camTop.aspect = W / Math.max(1, hTop); camTop.updateProjectionMatrix();
   camBot.aspect = W / Math.max(1, H - hTop); camBot.updateProjectionMatrix();
@@ -917,11 +959,11 @@ function frame(now) {
 async function applyConfig(c) {
   const prevMusic = CFG.music && CFG.music.files; const prevCars = JSON.stringify(CFG.cars);
   const merged = { ...CFG, ...c };
-  for (const k of ['sizes', 'avatarScale', 'logo', 'fonts', 'pov', 'bot', 'music', 'voice']) merged[k] = { ...CFG[k], ...(c[k] || {}) };
+  for (const k of ['sizes', 'avatarScale', 'logo', 'fonts', 'pov', 'bot', 'music', 'voice', 'likersBox']) merged[k] = { ...CFG[k], ...(c[k] || {}) };
   CFG = merged;
   for (const f of CFG.fontLib || []) if (f.url && !f._loaded) { try { const ff = new FontFace(f.family, `url("${f.url}")`); await ff.load(); document.fonts.add(ff); f._loaded = 1; } catch (e) { console.warn('font', f.family, e); } }
   for (const t of TIERS) try { await document.fonts.load(fontStr(64, CFG.fonts[t]), 'Ááằẫệ'); } catch (e) { }
-  renderHUD(); resize(); applyMusic(prevMusic);
+  renderHUD(); resize(); applyMusic(prevMusic); placeLikers(); setLikers(lastLikers);
   if (cars.length && JSON.stringify(CFG.cars) !== prevCars) applyLayout();
   if (c.bot && (c.bot.mode !== undefined || c.bot.preset !== undefined || c.bot.car !== undefined)) { bot.manual = false; bot.cycleT = 0; bot.cycleI = CFG.bot.preset || 0; bot.label = ''; }
 }
@@ -932,7 +974,7 @@ on('onCommand', c => {
   if (c.cmd === 'clear') clearAll();
   if (c.cmd === 'removeLast') { const all = allDecals(); if (all.length) { const e = all.reduce((a, b) => (a.t >= b.t ? a : b)); e.car.decals.splice(e.car.decals.indexOf(e), 1); disposeEntry(e); api.removeRecord && api.removeRecord(e.id); } }
   if (c.cmd === 'clearQueue') { queue.length = 0; updateQueueHUD(); }
-  if (c.cmd === 'previewLogo') { _lrKey = ''; const s = logoSlot(); if (s && !busy) { pov.controlled = true; povGo(s.stand.feet, s.p.clone(), s.stand.eye).then(() => setTimeout(() => { pov.controlled = false; pov.wanderWait = 1; }, 3000)); } }
+  if (c.cmd === 'previewLogo') { _lrKey = ''; const s = logoSlot(pickLogoSide()); if (s && !busy) { pov.controlled = true; povGo(s.stand.feet, s.p.clone(), s.stand.eye).then(() => setTimeout(() => { pov.controlled = false; pov.wanderWait = 1; }, 3000)); } }
   if (c.cmd === 'saveCam') api.addCamPreset && api.addCamPreset({ name: c.name || ('Góc ' + new Date().toLocaleTimeString('vi-VN')), ...currentCam() });
   if (c.cmd === 'botAuto') { bot.manual = false; bot.label = ''; }
   if (c.cmd === 'musicNext') musicNext();
@@ -963,5 +1005,6 @@ on('onAssetProgress', p => { const el = $('loading'); if (el) el.textContent = p
   $('loading') && $('loading').remove();
   ready = true; report();
   requestAnimationFrame(frame);
+  window.__dbg = { camTop, camBot, pov, renderer, get split() { return CFG.split; } };
   if (window.__DTCAP) window.__test = { renderer, scene, camTop, camBot, enqueue, cars, queue, get busy() { return busy; }, CFG, pov, bot, findPath };
 })();

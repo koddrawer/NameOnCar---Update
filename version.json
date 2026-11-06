@@ -1,31 +1,31 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "minBase": "1.1.0",
-  "notes": "1.2.0: showroom 5 xe, màn chia đôi POV + camera quay xe lưu góc, 25 font, nhạc nền, giọng đọc",
+  "notes": "1.3.0: Euler Stream WebSocket + tự nối lại, popup đếm tim kéo/đổi cỡ, chế độ 1080x1920, logo 2 cửa, bỏ nóc xe, font graffiti",
   "files": [
     {
       "path": "core.js",
-      "sha256": "e519c41ffd410350a5430a305f8910439b521d62d499558ce4874ae3147adccf"
+      "sha256": "e8d752fba844971ca6322a6b0511303221f1929a8e02baa86aad6b9090afcfe9"
     },
     {
       "path": "preload.js",
-      "sha256": "74cc6840b0778d4bc9a075370757c9b2335cb8b519606198286780d0284e8009"
+      "sha256": "6cca6c67b01d4200619eb27b91d4e42d76758fd638217cd6c9674640eade67bd"
     },
     {
       "path": "display.html",
-      "sha256": "481d16a17ac111f2f91de8137e08e786ab4090d6a35a418fa92c776644dc72a8"
+      "sha256": "57da8567757873aa03a60840a7c7fe6cf694dc9c886a722028d26ee0f7946dd0"
     },
     {
       "path": "control.html",
-      "sha256": "c41829f1246272450982c98b1fd065c8d2424cdd28eb1ae6ecc7661375a050e6"
+      "sha256": "4fb9f0d3d6ea65c143805e74fb5c851358d774d18798ee2b9bfb4747c1c644ee"
     },
     {
       "path": "control.js",
-      "sha256": "e6a87b3453a295d2fd2de5603cc35cfff6816d366b4a1f518beb36993ebbaba5"
+      "sha256": "21d6048de63efbc531354b9212e66db293ba6275d979263d2c50a7785e15ebca"
     },
     {
       "path": "dist/display.bundle.js",
-      "sha256": "38a576047339597c2108da125dd77f8fc642a7b4920cc2504ad14e746a8a95fd"
+      "sha256": "d926eef14128252b63bdf3c60c0c936e77aa08e8abd3b77d8977e7097262ff38"
     },
     {
       "path": "assets.json",
@@ -33,11 +33,11 @@
     },
     {
       "path": "fonts/fonts.css",
-      "sha256": "cd705d35f8f847b71c47365650f5acf627914e27ec8e81c7629dd210f32cee85"
+      "sha256": "2b2788ee6472c3ef1db116675245fef534c315f84122a9ea0a6487c58dc5da26"
     },
     {
       "path": "fonts/fonts.json",
-      "sha256": "701923e3e2e18f7fd8f4b62117745efef91c785ca61f09d6a825bdc917e6dbba"
+      "sha256": "e0a0906bda69ca5bc37acf36e5a9f0366da0a25009ecf8385e33e4d98b77517f"
     },
     {
       "path": "fonts/files/alex-brush-latin-400-normal.woff2",
@@ -76,6 +76,18 @@
       "sha256": "0f2643dd6a34fcdcf98cc339757dd3e8c801129aef82da7d7513d59fbf35cf40"
     },
     {
+      "path": "fonts/files/bangers-latin-400-normal.woff2",
+      "sha256": "04f54ff42ea2b8fc50b4259c29c60b1e05e606b769c2fb541c98624346c9767c"
+    },
+    {
+      "path": "fonts/files/bangers-latin-ext-400-normal.woff2",
+      "sha256": "2c9576bb1d612cf8750bf749689b5916287940fc99e1be5451b83d9fb6c4c5d9"
+    },
+    {
+      "path": "fonts/files/bangers-vietnamese-400-normal.woff2",
+      "sha256": "3275f18f3783930981517dd969e75911b9a5c774ac602299f635a083702e81b6"
+    },
+    {
       "path": "fonts/files/birthstone-latin-400-normal.woff2",
       "sha256": "ee253755a5e78a5ddc9dc3d9436a19a89071065697d611834a1f961782b03afe"
     },
@@ -88,12 +100,72 @@
       "sha256": "ead165caa5c9e34868770cc26490609623bb5d38084c2ba2e09145b5a59c2e16"
     },
     {
+      "path": "fonts/files/black-ops-one-latin-400-normal.woff2",
+      "sha256": "6e4c5eb97c2b5a41ebe33f4462385d551dabef7aa28cae7b3d6b77e63529eee5"
+    },
+    {
+      "path": "fonts/files/black-ops-one-latin-ext-400-normal.woff2",
+      "sha256": "250b26304048adccd1db0acbca72896d6fbc3eec45521ed84bebffa91ba81bdc"
+    },
+    {
+      "path": "fonts/files/black-ops-one-vietnamese-400-normal.woff2",
+      "sha256": "aafce99d96a32ca3e8021cacf44db65bf98b86dd1682e80a3b35ac6b01be6e61"
+    },
+    {
+      "path": "fonts/files/bungee-inline-latin-400-normal.woff2",
+      "sha256": "a81c6c1edfd956186d361c78330e5984cd2a8e0e9a8bcd77b137e6bc36839a73"
+    },
+    {
+      "path": "fonts/files/bungee-inline-latin-ext-400-normal.woff2",
+      "sha256": "1bdb536fe89b9eb42a966388f59f6c4d49b0bf1db0752c56e14871d3087d632b"
+    },
+    {
+      "path": "fonts/files/bungee-inline-vietnamese-400-normal.woff2",
+      "sha256": "c186dfa1a7986396be0b7933205141f8de4990a30410278bdc9be144632460dd"
+    },
+    {
       "path": "fonts/files/bungee-latin-400-normal.woff2",
       "sha256": "126eec706b7931682dbcf6c6efc274132c603f181fbf912678e6cfeb341e721b"
     },
     {
       "path": "fonts/files/bungee-latin-ext-400-normal.woff2",
       "sha256": "dff060f6e0f1d527570e707f5517a6332033030ea4619f4a86b39e10b66ecb74"
+    },
+    {
+      "path": "fonts/files/bungee-outline-latin-400-normal.woff2",
+      "sha256": "a4fe297e8980804e60d2f831ec46b6a3702284aaf3741f6b568b202f9f6d5ab1"
+    },
+    {
+      "path": "fonts/files/bungee-outline-latin-ext-400-normal.woff2",
+      "sha256": "5507533c1292f602fe17de2bf3cf22bf3b28a71e5858a1472b90ded2c1d4c403"
+    },
+    {
+      "path": "fonts/files/bungee-outline-vietnamese-400-normal.woff2",
+      "sha256": "839473830323edfca7afe9ca3db73db722d898ea88a046a6c369ac974dfe5f81"
+    },
+    {
+      "path": "fonts/files/bungee-shade-latin-400-normal.woff2",
+      "sha256": "5ac7452cbe7996c88c84998b86227ffbee8afb7ab5bd0b2b2512229dcac7e315"
+    },
+    {
+      "path": "fonts/files/bungee-shade-latin-ext-400-normal.woff2",
+      "sha256": "b65ebc1bef14d7d2b900703027c959a52e23602053278ef8cba4da12bcf7cbac"
+    },
+    {
+      "path": "fonts/files/bungee-shade-vietnamese-400-normal.woff2",
+      "sha256": "782ed509c5470118827014a3a6dc23bcb5395d0a1585f54d038262a81add052a"
+    },
+    {
+      "path": "fonts/files/bungee-spice-latin-400-normal.woff2",
+      "sha256": "9a6be05d340ab8b2b703d792a0f59967dbe77a46733533216811a3a121ef152d"
+    },
+    {
+      "path": "fonts/files/bungee-spice-latin-ext-400-normal.woff2",
+      "sha256": "97b220e9351c432b500b6da4952e1afdf4096eb3e978ac07113376a6870f408b"
+    },
+    {
+      "path": "fonts/files/bungee-spice-vietnamese-400-normal.woff2",
+      "sha256": "66c3ec432619d77af8e03595cd2a14cc6cfd33e7294fdf62c581a677c6760fa1"
     },
     {
       "path": "fonts/files/bungee-vietnamese-400-normal.woff2",
@@ -172,6 +244,18 @@
       "sha256": "f69b689f49df7a0448cb2d010927287f79cfce70aff77500d196eaffaee260d4"
     },
     {
+      "path": "fonts/files/fuzzy-bubbles-latin-700-normal.woff2",
+      "sha256": "31ae390b34f6fb0a61cc4400f62c5f776a86f5b86968ecf083bcd33ae43a7057"
+    },
+    {
+      "path": "fonts/files/fuzzy-bubbles-latin-ext-700-normal.woff2",
+      "sha256": "83125746efca5c343b20bc66c3322acce26582905dd2752f218b23ce10f3fd4f"
+    },
+    {
+      "path": "fonts/files/fuzzy-bubbles-vietnamese-700-normal.woff2",
+      "sha256": "7ba1efffee8fc1a9e5fdcde9aca3c7f83b16baaf5a32f6ea33ca6757ff32b701"
+    },
+    {
       "path": "fonts/files/great-vibes-latin-400-normal.woff2",
       "sha256": "c59dc73d29daf142ef2431f455d21464172374aa750d793a79d608735db2d856"
     },
@@ -218,6 +302,18 @@
     {
       "path": "fonts/files/itim-vietnamese-400-normal.woff2",
       "sha256": "99d13e5190046d535b9b586ffdf1c06ae19e8d628a2644a470ee56c1ac6d6fa3"
+    },
+    {
+      "path": "fonts/files/kablammo-latin-400-normal.woff2",
+      "sha256": "63672a05390a721d70c6fe7923467c06ce3b83e1897babe343e6d8d4b5f62674"
+    },
+    {
+      "path": "fonts/files/kablammo-latin-ext-400-normal.woff2",
+      "sha256": "9d2aea07f941cd0a54c21e561a5a384f532ac6e86b2a670f4a248deb9350338d"
+    },
+    {
+      "path": "fonts/files/kablammo-vietnamese-400-normal.woff2",
+      "sha256": "5d2e66f00af90082c8aaa887e49a145b6d02f581d4f062851a356fd6a353c708"
     },
     {
       "path": "fonts/files/lobster-latin-400-normal.woff2",
@@ -316,6 +412,90 @@
       "sha256": "ac4b4d6e21b14b203c2e86c1276fd101c13e9d99f530c0bab61a9efcccbfa452"
     },
     {
+      "path": "fonts/files/protest-guerrilla-latin-400-normal.woff2",
+      "sha256": "1ea016c93b0aba9bb911f909949f74c7ec44d61d3a8809ecd9ea3f37ee12d1ce"
+    },
+    {
+      "path": "fonts/files/protest-guerrilla-latin-ext-400-normal.woff2",
+      "sha256": "ab90678fa3c2ff7ce5ea2e168e3a4fadbdb36577226d1bf4f24f38ca07935da8"
+    },
+    {
+      "path": "fonts/files/protest-guerrilla-vietnamese-400-normal.woff2",
+      "sha256": "fe4db5255a6a2309a6e8b515512b1d50b40021a2c8129087c5e5a3421cc0965a"
+    },
+    {
+      "path": "fonts/files/protest-revolution-latin-400-normal.woff2",
+      "sha256": "013ee4a194eea93946a335c818c5408b8a47301d4f4721d1e8514338f1fe7708"
+    },
+    {
+      "path": "fonts/files/protest-revolution-latin-ext-400-normal.woff2",
+      "sha256": "73edbc1fd83187a22258e5189f09159c92a71271c8727b063a5f063ee70f4acc"
+    },
+    {
+      "path": "fonts/files/protest-revolution-vietnamese-400-normal.woff2",
+      "sha256": "037f7e8461dc7a30b835e4bb17888d4a25ee9ea7d3e7e94a19d6caffc98e246e"
+    },
+    {
+      "path": "fonts/files/protest-riot-latin-400-normal.woff2",
+      "sha256": "24f2a4e3d18340db28285d90007442eea236121e31e8c9103a7f28c8aa5ba1ae"
+    },
+    {
+      "path": "fonts/files/protest-riot-latin-ext-400-normal.woff2",
+      "sha256": "ff415687d736d6161accf1c68cb40bc03d7247a32a021ee8e0fc59fd9664b298"
+    },
+    {
+      "path": "fonts/files/protest-riot-vietnamese-400-normal.woff2",
+      "sha256": "a4cfb25191150d5767c464ed0052498304c9cb78033690c632453188dd96fd8f"
+    },
+    {
+      "path": "fonts/files/protest-strike-latin-400-normal.woff2",
+      "sha256": "f9a57623e05816449c30d30c3afc5a3db202fe136cffc36c41337bb1e5e024d4"
+    },
+    {
+      "path": "fonts/files/protest-strike-latin-ext-400-normal.woff2",
+      "sha256": "9ba6e691891ac6eba59113df595dfa0d8cdba534736fb591a0a0ab8fb9fe15a9"
+    },
+    {
+      "path": "fonts/files/protest-strike-vietnamese-400-normal.woff2",
+      "sha256": "93f6894885fc87119141ab81a2d5e6a08f0985afb31aeffb3e3869c85dbdca16"
+    },
+    {
+      "path": "fonts/files/sedgwick-ave-display-latin-400-normal.woff2",
+      "sha256": "33a12de3b608a011d3caad5bfd4e529f0f8d177cc5ba184c68ed6ba998fe02dc"
+    },
+    {
+      "path": "fonts/files/sedgwick-ave-display-latin-ext-400-normal.woff2",
+      "sha256": "e8d680bf1caa2247b3514eb1cdf3d29cc09060c57d76f69bb7bd255e4c385492"
+    },
+    {
+      "path": "fonts/files/sedgwick-ave-display-vietnamese-400-normal.woff2",
+      "sha256": "506c0f132dc9b951da8d51772222d19fa94754eb580062d768dd381268c40817"
+    },
+    {
+      "path": "fonts/files/sedgwick-ave-latin-400-normal.woff2",
+      "sha256": "58d94cdbff7374e387b03ac90cf0b452acf0e9355e75aa7bbad6bd17bb6556f4"
+    },
+    {
+      "path": "fonts/files/sedgwick-ave-latin-ext-400-normal.woff2",
+      "sha256": "b39a750d347cc3e68527448c9f130c34a8f86a3c58431bcde550a21fdcb79f63"
+    },
+    {
+      "path": "fonts/files/sedgwick-ave-vietnamese-400-normal.woff2",
+      "sha256": "427292eb911e40261d845b5dc22e85194c58185a850a077c19ba506c91ad18c1"
+    },
+    {
+      "path": "fonts/files/sigmar-latin-400-normal.woff2",
+      "sha256": "c2d85d0866714a431b72faacd5734d7b7fd0979119cb51f66b5052783cae5f10"
+    },
+    {
+      "path": "fonts/files/sigmar-latin-ext-400-normal.woff2",
+      "sha256": "6c267a08aae9e1f181e9bc51493b442b2e12f682738c319c5563df128d7a742f"
+    },
+    {
+      "path": "fonts/files/sigmar-vietnamese-400-normal.woff2",
+      "sha256": "4f05b71a880235dd800023c0f093b4e73c3430cdf690f9d6f322d8bdc9c8b027"
+    },
+    {
       "path": "fonts/files/sriracha-latin-400-normal.woff2",
       "sha256": "dd66cc98657b4048be3950edac49aea725b2a9db5db6cea36b639160a88d7691"
     },
@@ -326,6 +506,18 @@
     {
       "path": "fonts/files/sriracha-vietnamese-400-normal.woff2",
       "sha256": "9b3aeadf4cafb10be9fc7009f79006aed5271057ce0fe1ec961ea760c46e3a2e"
+    },
+    {
+      "path": "fonts/files/vina-sans-latin-400-normal.woff2",
+      "sha256": "a02eec803fbd73e69ade9e2c75dac59f37220bcf921f3d50138a101b695ad8fd"
+    },
+    {
+      "path": "fonts/files/vina-sans-latin-ext-400-normal.woff2",
+      "sha256": "e4c690dfcd8079e772d9da47dbcaa9d17976ac46b4924b66c6363fff2da75df3"
+    },
+    {
+      "path": "fonts/files/vina-sans-vietnamese-400-normal.woff2",
+      "sha256": "c1c5ff4323e70f47f30d3818367a2c271da6f5e3f2c16a33908be0d2d0999e40"
     },
     {
       "path": "fonts/files/water-brush-latin-400-normal.woff2",

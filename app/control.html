@@ -21,8 +21,8 @@
   section h2{font-size:12px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
   .row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
   .row>label:first-child{min-width:130px;color:var(--mut)}
-  input[type=text],input[type=number],textarea,select{background:#0e1016;color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
-  input[type=number]{width:72px} input[type=text]{flex:1;min-width:110px} textarea{width:100%;min-height:90px;resize:vertical}
+  input[type=text],input[type=password],input[type=number],textarea,select{background:#0e1016;color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
+  input[type=number]{width:72px} input[type=text],input[type=password]{flex:1;min-width:110px} textarea{width:100%;min-height:90px;resize:vertical}
   input[type=range]{flex:1} input[type=color]{width:36px;height:28px;border:none;background:none;padding:0}
   button{background:#262a37;color:var(--tx);border:1px solid #363b4c;border-radius:6px;padding:7px 11px;font:inherit;cursor:pointer}
   button:hover{border-color:var(--acc)} button.pri{background:var(--acc);color:#1b1400;border-color:var(--acc);font-weight:700}
@@ -35,6 +35,10 @@
   .stat{display:flex;gap:12px;color:var(--mut);font-size:12px}.stat b{color:var(--tx)}
   .val{width:42px;text-align:right;color:var(--acc)}
   small{color:var(--mut)}
+  .cstat{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
+  .cstat div{background:#0e1016;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--mut)}
+  .cstat b{display:block;font-size:14px;color:var(--tx)}
+  .cstat .wide{grid-column:1/-1}
   .car{border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:8px;background:#151821}
   .car .head{display:flex;align-items:center;gap:8px;margin-bottom:6px}.car .head b{flex:1}
   .car .grid div{font-size:11px}
@@ -59,7 +63,11 @@
 <section>
   <h2>Kết nối TikTok LIVE</h2>
   <div class="row"><input type="text" id="user" placeholder="username (không cần @)"><button class="pri" id="btnConn">Kết nối</button><button id="btnDis">Ngắt</button></div>
-  <div class="row"><label><input type="checkbox" data-k="autoConnect"> Tự kết nối khi mở app</label></div>
+  <div class="row"><label>Cách kết nối</label><select data-k="conn.mode"><option value="connector">Thư viện TikTok-Live-Connector (miễn phí)</option><option value="euler">Euler Stream WebSocket (ổn định nhất, cần API key)</option></select></div>
+  <div class="row" id="rowEuler"><label>API key Euler</label><input type="password" data-k="conn.eulerKey" placeholder="dán API key hoặc JWT từ eulerstream.com"><button class="sm" id="showKey">👁</button></div>
+  <div class="row" id="rowSign"><label>Sign key Euler (tuỳ chọn)</label><input type="password" data-k="conn.signKey" placeholder="để trống = dùng giới hạn miễn phí"></div>
+  <div class="row"><label>Tự nối lại nếu im lặng (giây)</label><input type="number" min="45" data-k="conn.watchdog"><label><input type="checkbox" data-k="autoConnect"> Tự kết nối khi mở app</label></div>
+  <div id="connStats" class="cstat"></div>
   <div class="row"><small id="cur">Đang rảnh</small></div>
 </section>
 <section>
@@ -100,7 +108,7 @@
 <section>
   <h2>Logo cửa xe (100 xu)</h2>
   <div class="row"><label>Xe in logo</label><select data-k="logo.car" id="logoCar"></select><button id="prevLogo2">👁 Xem</button></div>
-  <div class="row"><label>Bên xe</label><select data-k="logo.side" data-num="1"><option value="1">Bên trái</option><option value="-1">Bên phải</option></select></div>
+  <div class="row"><label>In cửa nào trước</label><select data-k="logo.side" data-num="1"><option value="1">Cửa trái → rồi cửa phải</option><option value="-1">Cửa phải → rồi cửa trái</option></select><small>Cả 2 cửa đã có người thì thay người cũ nhất</small></div>
   <div class="row"><label>Trước ↔ sau</label><input type="range" min="-0.4" max="0.4" step="0.01" data-k="logo.along"><span class="val" data-v="logo.along"></span></div>
   <div class="row"><label>Cao ↕ thấp</label><input type="range" min="0.1" max="0.6" step="0.01" data-k="logo.height"><span class="val" data-v="logo.height"></span></div>
   <div class="row"><label>Kích thước (m)</label><input type="range" min="0.3" max="1.1" step="0.01" data-k="logo.size"><span class="val" data-v="logo.size"></span></div>
@@ -109,6 +117,11 @@
 
 <!-- ============ CAMERA ============ -->
 <div class="tab" id="t-cam">
+<section>
+  <h2>Kích thước màn hình LIVE</h2>
+  <div class="row"><label>Chế độ</label><select data-k="windowMode"><option value="free">Tự do (kéo cửa sổ, giữ 9:16)</option><option value="1080x1920">1080 × 1920 (Full HD dọc)</option><option value="720x1280">720 × 1280</option><option value="540x960">540 × 960 (xem trước)</option></select></div>
+  <div class="row"><small>Kích thước thật đang render: <b id="dispSize">—</b> px. Đã tính hệ số scale của Windows (125%/150%).</small></div>
+</section>
 <section>
   <h2>Chia màn hình</h2>
   <div class="row"><label>Tỉ lệ màn trên</label><input type="range" min="0.3" max="0.75" step="0.01" data-k="split"><span class="val" data-v="split"></span></div>
@@ -141,6 +154,12 @@
   <div id="fontRows"></div>
   <div class="row"><button id="pickFonts">➕ Thêm font (.ttf/.otf, chọn nhiều)…</button></div>
   <div class="list" id="userFonts"></div>
+</section>
+<section>
+  <h2>Bảng đếm tim (popup)</h2>
+  <div class="row"><label><input type="checkbox" data-k="likersBox.show"> Hiện bảng</label><small>Kéo bảng trên màn LIVE để di chuyển; kéo chấm hồng ở góc hoặc lăn chuột để đổi cỡ.</small></div>
+  <div class="row"><label>Cỡ bảng</label><input type="range" min="0.35" max="2.5" step="0.05" data-k="likersBox.scale"><span class="val" data-v="likersBox.scale"></span></div>
+  <div class="row"><label>Số người hiện</label><input type="number" min="1" max="10" data-k="likersBox.rows"><button id="lkReset">↺ Đặt lại vị trí</button></div>
 </section>
 <section>
   <h2>Mực & cỡ chữ</h2>

@@ -1,5 +1,5 @@
 // Car Sign Live — core (được cập nhật nóng qua GitHub; bootstrap ở main.js)
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { pathToFileURL } = require('url');
@@ -19,6 +19,7 @@ const DEFAULT_CARS = [
 ];
 const DEFAULTS = {
   tiktokUser: '', autoConnect: false,
+  conn: { mode: 'connector', eulerKey: '', signKey: '', watchdog: 180 },
   likeThreshold: 100, likeRepeat: true,
   tiers: { small: 1, big: 5, silver: 10, gold: 30, logo: 100 },
   title: 'KÝ TÊN LÊN XE',
@@ -32,6 +33,8 @@ const DEFAULTS = {
   cars: DEFAULT_CARS,
   logo: { car: 'x3', side: 1, along: 0.06, height: 0.30, size: 0.68 },
   split: 0.5,
+  windowMode: 'free',
+  likersBox: { show: true, x: 0.025, y: 0.2, scale: 0.75, rows: 3 },
   pov: { shake: 1, walkSpeed: 1.4, fov: 58, zoomMin: 24, idleWander: true, steps: true },
   bot: { mode: 'auto', car: 'all', speed: 1, follow: true, cycle: 8, preset: 0, presets: [] },
   sound: true,
@@ -65,6 +68,7 @@ function createWindows() {
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, backgroundThrottling: false, autoplayPolicy: 'no-user-gesture-required' },
   });
   displayWin.setAspectRatio(9 / 16);
+  displayWin.webContents.once('did-finish-load', () => applyWindowMode());
   displayWin.loadFile(path.join(__dirname, 'display.html'));
   controlWin = new BrowserWindow({
     width: 600, height: 960, title: 'Car Sign Live — Bảng điều khiển', backgroundColor: '#11131a', autoHideMenuBar: true,
@@ -133,55 +137,167 @@ async function addLikes(user, n) {
 }
 
 // ---------------- TIKTOK ----------------
-let conn = null;
+// 2 chế độ: 'connector' = thư viện tiktok-live-connector (ký qua Euler, key tuỳ chọn)
+//           'euler'     = Euler Stream WebSocket (máy chủ Euler giữ kết nối TikTok, cần API key)
+const requireApp = m => require('module').createRequire(path.join(app.getAppPath(), 'package.json'))(m);
 function normUser(d) {
   const u = d.user || d;
   const pic = d.profilePictureUrl || u.profilePictureUrl || u.profilePicture?.url?.[0] || u.profilePicture?.urls?.[0] || u.profilePicture?.urlList?.[0] || u.avatarThumb?.urlList?.[0] || u.avatarThumb?.url?.[0] || '';
   return { id: u.uniqueId || u.displayId || d.uniqueId || String(u.userId || d.userId || ''), name: u.nickname || d.nickname || u.uniqueId || u.displayId || 'Ẩn danh', avatar: pic };
 }
 let debugCount = 0;
+const seenMsg = new Set(), seenQ = [];
+function dup(id) { if (!id) return false; if (seenMsg.has(id)) return true; seenMsg.add(id); seenQ.push(id); if (seenQ.length > 3000) seenMsg.delete(seenQ.shift()); return false; }
 function onGift(d) {
+  touch('gift');
   const giftType = d.giftType ?? d.giftDetails?.giftType ?? d.gift?.type ?? d.giftDetails?.type;
-  const repeatEnd = !!(d.repeatEnd);
+  const repeatEnd = !!(Number(d.repeatEnd) || d.repeatEnd === true);
   if (debugCount < 5) { debugCount++; try { fs.appendFileSync(LOG_FILE, JSON.stringify(d, (k, v) => typeof v === 'bigint' ? String(v) : v).slice(0, 4000) + '\n\n'); } catch (e) { } }
-  if (giftType === 1 && !repeatEnd) return;           // quà combo: chờ kết thúc chuỗi
+  if (Number(giftType) === 1 && !repeatEnd) return;           // quà combo: chờ kết thúc chuỗi
+  const user = normUser(d);
+  const msgId = d.common?.msgId || d.msgId;
+  if (dup(msgId ? 'g' + msgId : `g${user.id}|${d.groupId || ''}|${d.giftId || d.giftDetails?.id || ''}|${d.repeatCount}|${repeatEnd}`)) return;   // tránh trùng sau khi kết nối lại
   const diamond = Number(d.diamondCount ?? d.giftDetails?.diamondCount ?? d.gift?.diamondCount ?? d.extendedGiftInfo?.diamond_count ?? 0);
   const repeat = Number(d.repeatCount || 1);
   const coins = diamond * repeat;
-  const user = normUser(d);
   const giftName = d.giftName || d.giftDetails?.giftName || d.extendedGiftInfo?.name || d.gift?.name || 'quà';
   log(`🎁 ${user.name} tặng ${giftName} x${repeat} = ${coins} xu`);
   const tier = tierFor(coins);
   if (tier) pushJob(tier, user, { coins, gift: giftName });
 }
-async function connectTikTok(username) {
-  username = String(username || '').replace(/^@/, '').trim();
-  if (!username) return { ok: false, error: 'Chưa nhập username' };
-  await disconnectTikTok();
-  config.tiktokUser = username; saveConfig();
+function onLike(d) {
+  touch('like');
+  const msgId = d.common?.msgId || d.msgId; if (msgId && dup('l' + msgId)) return;
+  addLikes(normUser(d), Number(d.likeCount ?? d.count ?? 1));
+}
+function onViewers(d) { touch(); const v = d.viewerCount ?? d.total ?? d.totalUser; if (v !== undefined) send(controlWin, 'status', { viewers: Number(v) }); }
+
+// ---- trạng thái kết nối (để theo dõi độ ổn định) ----
+const CS = { state: 'off', mode: '', user: '', since: 0, lastEvent: 0, events: 0, gifts: 0, likes: 0, reconnects: 0, lastError: '', attempt: 0, startedAt: 0 };
+function setState(state, extra = {}) { Object.assign(CS, { state }, extra); if (state === 'live') CS.since = Date.now(); pushStats(); send(controlWin, 'status', { connected: state === 'live' }); }
+function touch(kind) { CS.lastEvent = Date.now(); CS.events++; if (kind === 'gift') CS.gifts++; if (kind === 'like') CS.likes++; if (CS.state === 'live' && CS.attempt && Date.now() - CS.since > 60000) CS.attempt = 0; }
+function pushStats() { send(controlWin, 'connStats', { ...CS, now: Date.now() }); }
+setInterval(pushStats, 2000);
+
+let conn = null, eulerWs = null, reTimer = null, watchTimer = null, pingTimer = null, wantUser = '', gen = 0;
+const CLOSE_TEXT = { 1000: 'Đóng bình thường', 1006: 'Mất mạng / đứt kết nối', 1011: 'Lỗi máy chủ Euler', 4005: 'Phiên LIVE đã kết thúc', 4006: 'Lâu không có tin nhắn', 4400: 'Tham số sai', 4401: 'API key Euler không hợp lệ', 4403: 'Gói Euler không có quyền WebSocket', 4404: 'Tài khoản chưa LIVE', 4408: 'Không trả lời ping', 4429: 'Quá số kết nối cho phép của gói Euler', 4500: 'TikTok đóng kết nối', 4555: 'Hết thời lượng tối đa 1 kết nối', 4556: 'Lỗi lấy dữ liệu TikTok', 4557: 'Lỗi lấy thông tin phòng' };
+function retryDelay(code) {
+  if ([4400, 4401, 4403].includes(code)) return -1;            // lỗi cấu hình: không thử lại
+  if (code === 4404 || code === 4005) return 20000;             // chờ lên LIVE lại
+  if (code === 4429) return 60000;
+  if (code === 4555) return 500;                                // hết lifetime: nối lại ngay
+  CS.attempt++; return Math.min(60000, 2000 * Math.pow(2, CS.attempt - 1));
+}
+function scheduleReconnect(code, why) {
+  clearTimeout(reTimer); if (!wantUser) return;
+  const d = retryDelay(code);
+  if (d < 0) { setState('error', { lastError: why }); log(`⛔ ${why} — dừng tự kết nối. Kiểm tra lại cài đặt rồi bấm Kết nối.`); return; }
+  setState(code === 4404 || code === 4005 ? 'waiting' : 'reconnecting', { lastError: why });
+  log(`↻ ${why} — thử lại sau ${Math.round(d / 1000)} giây`);
+  reTimer = setTimeout(() => { CS.reconnects++; openConnection(wantUser, true); }, d);
+}
+function startWatchdog(myGen) {
+  clearInterval(watchTimer);
+  watchTimer = setInterval(() => {
+    if (myGen !== gen || CS.state !== 'live') return;
+    const limit = (config.conn.watchdog || 180) * 1000;
+    if (Date.now() - CS.lastEvent > limit) { log(`⚠️ ${Math.round(limit / 1000)} giây không có sự kiện — kết nối lại cho chắc`); closeCurrent(); scheduleReconnect(0, 'Watchdog'); }
+  }, 5000);
+}
+function closeCurrent() {
+  gen++; clearInterval(pingTimer); clearInterval(watchTimer);
+  if (eulerWs) { const w = eulerWs; eulerWs = null; try { w.removeAllListeners(); w.on('error', () => { }); w.close(1000); setTimeout(() => { try { w.terminate(); } catch (e) { } }, 2000); } catch (e) { } }
+  if (conn) { const c = conn; conn = null; try { c.removeAllListeners && c.removeAllListeners(); c.disconnect(); } catch (e) { } }
+}
+function openConnection(username, isRetry) {
+  closeCurrent(); const myGen = gen;
+  CS.mode = config.conn.mode; CS.user = username; if (!isRetry) { CS.startedAt = Date.now(); CS.reconnects = 0; CS.events = CS.gifts = CS.likes = 0; CS.attempt = 0; }
+  setState('connecting');
+  return config.conn.mode === 'euler' ? openEuler(username, myGen) : openConnector(username, myGen);
+}
+// ---- Euler Stream WebSocket ----
+function openEuler(username, myGen) {
+  return new Promise(resolve => {
+    const key = String(config.conn.eulerKey || '').trim();
+    if (!key) { setState('error', { lastError: 'Chưa nhập API key Euler' }); log('⛔ Chưa nhập API key Euler Stream'); return resolve({ ok: false, error: 'Chưa nhập API key Euler' }); }
+    const WS = requireApp('ws');
+    const q = new URLSearchParams({ uniqueId: username, 'features.bundleEvents': 'true', 'features.schemaVersion': 'v2' });
+    q.set(key.split('.').length === 3 ? 'jwtKey' : 'apiKey', key);
+    const base = config.conn.eulerUrl || 'wss://ws.eulerstream.com';
+    const ws = new WS(`${base}?${q}`, { handshakeTimeout: 15000 }); eulerWs = ws;
+    let opened = false, alive = true, done = false; const finish = r => { if (!done) { done = true; resolve(r); } };
+    ws.on('open', () => {
+      opened = true; CS.lastEvent = Date.now();
+      setState('live'); log(`✅ Euler Stream: đã kết nối @${username}`); finish({ ok: true });
+      clearInterval(pingTimer);
+      pingTimer = setInterval(() => { if (!alive) { log('⚠️ Euler không trả lời ping — kết nối lại'); try { ws.terminate(); } catch (e) { } return; } alive = false; try { ws.ping(); } catch (e) { } }, 20000);
+      startWatchdog(myGen);
+    });
+    ws.on('pong', () => { alive = true; });
+    ws.on('message', (raw, isBinary) => {
+      if (myGen !== gen) return; alive = true;
+      let j; try { j = JSON.parse(isBinary ? raw.toString('utf8') : String(raw)); } catch (e) { return; }
+      const items = Array.isArray(j) ? j : Array.isArray(j.messages) ? j.messages : [j];
+      for (const it of items) {
+        const type = it.type || it.event || ''; const data = it.data || it;
+        try {
+          if (/GiftMessage$/.test(type)) onGift(data);
+          else if (/LikeMessage$/.test(type)) onLike(data);
+          else if (/RoomUserSeqMessage$/.test(type)) onViewers(data);
+          else if (type === 'room.status') { touch(); if (data.state === 'ended' || data.state === 'offline') log('ℹ️ Euler: phòng ' + data.state); else if (data.state === 'reconnecting') log(`ℹ️ Euler đang nối lại TikTok (lần ${data.attempt || '?'})`); }
+          else if (type === 'tiktok.disconnect') log('ℹ️ Euler: TikTok ngắt (' + (CLOSE_TEXT[data.reason] || data.reason) + ')');
+          else if (type) touch();
+        } catch (e) { log('Lỗi xử lý sự kiện ' + type + ': ' + e.message); }
+      }
+    });
+    ws.on('unexpected-response', (req, res) => { log(`❌ Euler HTTP ${res.statusCode}`); });
+    ws.on('error', e => { if (myGen === gen) CS.lastError = e.message; });
+    ws.on('close', (code, reason) => {
+      clearInterval(pingTimer);
+      if (myGen !== gen) return; eulerWs = null;
+      const why = `${CLOSE_TEXT[code] || 'Đóng'} (mã ${code}${reason && String(reason) ? ': ' + String(reason).slice(0, 80) : ''})`;
+      if (!opened) log('❌ Euler: ' + why);
+      finish({ ok: false, error: why });
+      scheduleReconnect(code, why);
+    });
+  });
+}
+// ---- thư viện tiktok-live-connector ----
+async function openConnector(username, myGen) {
   try {
     const mod = await global.CSL.importTikTok();
     const Conn = mod.TikTokLiveConnection || mod.WebcastPushConnection;
     const EV = mod.WebcastEvent || {};
-    conn = new Conn(username, { processInitialData: false, enableExtendedGiftInfo: true });
-    conn.on(EV.GIFT || 'gift', onGift);
-    conn.on(EV.LIKE || 'like', d => { const n = Number(d.likeCount ?? d.count ?? 1); addLikes(normUser(d), n); });
-    conn.on(EV.ROOM_USER || 'roomUser', d => send(controlWin, 'status', { viewers: d.viewerCount ?? d.total ?? 0 }));
-    conn.on(EV.STREAM_END || 'streamEnd', () => { log('⛔ Phiên LIVE đã kết thúc'); send(controlWin, 'status', { connected: false }); });
-    conn.on(EV.DISCONNECTED || 'disconnected', () => { log('Mất kết nối TikTok'); send(controlWin, 'status', { connected: false }); scheduleReconnect(username); });
-    conn.on('error', e => log('Lỗi: ' + (e?.message || e?.info || e)));
-    const st = await conn.connect();
-    log(`✅ Đã kết nối @${username} (room ${st?.roomId || ''})`);
-    send(controlWin, 'status', { connected: true });
+    const opts = { processInitialData: false, enableExtendedGiftInfo: true };
+    if (config.conn.signKey) opts.signApiKey = String(config.conn.signKey).trim();
+    const c = new Conn(username, opts); conn = c;
+    c.on(EV.GIFT || 'gift', d => myGen === gen && onGift(d));
+    c.on(EV.LIKE || 'like', d => myGen === gen && onLike(d));
+    c.on(EV.ROOM_USER || 'roomUser', d => myGen === gen && onViewers(d));
+    for (const ev of [EV.CHAT || 'chat', EV.MEMBER || 'member', EV.SOCIAL || 'social']) c.on(ev, () => myGen === gen && touch());
+    c.on(EV.STREAM_END || 'streamEnd', () => { if (myGen !== gen) return; closeCurrent(); scheduleReconnect(4005, 'Phiên LIVE đã kết thúc'); });
+    c.on(EV.DISCONNECTED || 'disconnected', () => { if (myGen !== gen) return; closeCurrent(); scheduleReconnect(1006, 'Mất kết nối TikTok'); });
+    c.on('error', e => { if (myGen === gen) CS.lastError = String(e?.message || e?.info || e).slice(0, 200); });
+    const st = await c.connect();
+    if (myGen !== gen) return { ok: false };
+    CS.lastEvent = Date.now(); setState('live'); startWatchdog(myGen);
+    log(`✅ Đã kết nối @${username} (room ${st?.roomId || ''})${config.conn.signKey ? ' · ký bằng API key Euler' : ''}`);
     return { ok: true };
   } catch (e) {
-    log('❌ Kết nối thất bại: ' + (e?.message || e)); send(controlWin, 'status', { connected: false });
-    return { ok: false, error: String(e?.message || e) };
+    if (myGen !== gen) return { ok: false };
+    const msg = String(e?.message || e); const offline = /offline|not live|UserOffline|isn't online|LIVE has ended/i.test(msg) || e?.name === 'UserOfflineError';
+    log('❌ Kết nối thất bại: ' + msg.slice(0, 200));
+    closeCurrent(); scheduleReconnect(offline ? 4404 : /rate|429|limit/i.test(msg) ? 4429 : 0, offline ? 'Tài khoản chưa LIVE' : msg.slice(0, 120));
+    return { ok: false, error: msg };
   }
 }
-let reTimer = null, manualOff = false;
-function scheduleReconnect(u) { if (manualOff) return; clearTimeout(reTimer); reTimer = setTimeout(() => { log('Thử kết nối lại…'); connectTikTok(u); }, 15000); }
-async function disconnectTikTok() { clearTimeout(reTimer); if (conn) { const c = conn; conn = null; manualOff = true; try { c.removeAllListeners && c.removeAllListeners(); await c.disconnect(); } catch (e) { } manualOff = false; } }
+async function connectTikTok(username) {
+  username = String(username || '').replace(/^https?:\/\/(www\.)?tiktok\.com\//, '').replace(/\/live.*$/, '').replace(/^@/, '').trim();
+  if (!username) return { ok: false, error: 'Chưa nhập username' };
+  config.tiktokUser = username; saveConfig(); wantUser = username; clearTimeout(reTimer);
+  return openConnection(username, false);
+}
+async function disconnectTikTok() { wantUser = ''; clearTimeout(reTimer); closeCurrent(); setState('off'); }
 
 // ---------------- ASSETS (model xe, showroom) ----------------
 const ASSET_DIR = path.join(DATA, 'assets');
@@ -253,11 +369,26 @@ function displayConfig() {
 }
 function broadcastConfig() { send(displayWin, 'config', displayConfig()); send(controlWin, 'configChanged', config); }
 
+// ---------------- KÍCH THƯỚC CỬA SỔ LIVE ----------------
+const MODES = { '1080x1920': [1080, 1920], '720x1280': [720, 1280], '540x960': [540, 960] };
+function applyWindowMode() {
+  if (!displayWin || displayWin.isDestroyed()) return;
+  const m = MODES[config.windowMode]; if (!m) { displayWin.setResizable(true); return; }
+  if (displayWin.isMaximized()) displayWin.unmaximize(); if (displayWin.isFullScreen()) displayWin.setFullScreen(false);
+  const sf = screen.getDisplayMatching(displayWin.getBounds()).scaleFactor || 1;   // Windows scale 125%/150%…
+  const w = Math.round(m[0] / sf), h = Math.round(m[1] / sf);
+  displayWin.setAspectRatio(0); displayWin.setResizable(true);
+  displayWin.setContentSize(w, h); displayWin.setAspectRatio(9 / 16); displayWin.setResizable(false);
+  const wa = screen.getDisplayMatching(displayWin.getBounds()).workArea; const b = displayWin.getBounds();
+  if (b.y < wa.y || b.y > wa.y + wa.height - 80) displayWin.setPosition(b.x, wa.y);
+  log(`🖥 Màn hình LIVE: ${m[0]}×${m[1]} px (scale Windows ${Math.round(sf * 100)}%)` + (h > wa.height ? ' — cao hơn màn hình, phần dưới vẫn được LIVE Studio quay' : ''));
+}
+
 // ---------------- GIỌNG NÓI (TTS) ----------------
 const ttsCache = new Map();
 function edgeTTS(text, voice, rate) {
   return new Promise((resolve, reject) => {
-    const WS = require('module').createRequire(path.join(app.getAppPath(), 'package.json'))('ws');
+    const WS = requireApp('ws');
     const TOKEN = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
     let ticks = BigInt(Math.floor(Date.now() / 1000) + 11644473600); ticks -= ticks % 300n; ticks *= 10000000n;
     const gec = require('crypto').createHash('sha256').update(ticks.toString() + TOKEN).digest('hex').toUpperCase();
@@ -310,10 +441,13 @@ ipcMain.handle('tts', async (e, text) => {
 // ---------------- IPC ----------------
 ipcMain.handle('getInit', async () => ({ config: displayConfig(), history, urls: await carUrls(), version: global.CSL.version }));
 ipcMain.handle('getConfig', () => config);
-ipcMain.handle('getFontLib', () => fontLib().map(f => f.family));
+ipcMain.handle('getFontLib', () => fontLib().map(f => ({ family: f.family, group: f.group || (f.user ? 'Font của bạn' : 'Khác') })));
 ipcMain.handle('setConfig', (e, patch) => {
   const carsBefore = JSON.stringify(config.cars.map(c => [c.id, c.path, c.paint, c.length]));
+  const prevMode = config.windowMode;
   config = deepMerge(config, patch); saveConfig();
+  if (patch.windowMode !== undefined && patch.windowMode !== prevMode) applyWindowMode();
+  if (controlWin && e.sender !== controlWin.webContents) send(controlWin, 'configChanged', config);
   const carsAfter = JSON.stringify(config.cars.map(c => [c.id, c.path, c.paint, c.length]));
   if (carsBefore !== carsAfter) displayWin && displayWin.reload(); else send(displayWin, 'config', displayConfig());
   return config;

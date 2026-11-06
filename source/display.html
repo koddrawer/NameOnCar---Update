@@ -17,13 +17,19 @@
   #legend span{font-size:1.45vh;font-weight:700;padding:.4vh 1vh;border-radius:99px;background:rgba(10,12,20,.62);border:1px solid rgba(255,207,77,.45);white-space:nowrap}
   #divider{position:fixed;left:0;right:0;top:var(--split);height:.45vh;transform:translateY(-50%);pointer-events:none;
     background:linear-gradient(90deg,transparent,#ffcf4d 15%,#fff3c4 50%,#ffcf4d 85%,transparent);box-shadow:0 0 1.6vh rgba(255,200,60,.8)}
-  #likers{position:fixed;left:2.5vw;top:calc(var(--split) * .42);display:flex;flex-direction:column;gap:.7vh;pointer-events:none}
-  .lk{display:flex;align-items:center;gap:.9vh;background:rgba(10,12,20,.65);border-radius:99px;padding:.4vh 1.2vh .4vh .4vh;border:1px solid rgba(255,90,120,.4)}
-  .lk img{width:3.6vh;height:3.6vh;border-radius:50%;object-fit:cover}
-  .lkb{width:14vh}.lkn{font-size:1.35vh;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .bar{height:.8vh;border-radius:9px;background:rgba(255,255,255,.15);overflow:hidden;margin-top:.3vh}
+  #likers{position:fixed;left:2.5%;top:20%;z-index:5;pointer-events:auto;cursor:move;transform-origin:top left;transform:scale(var(--ls,.75));
+    background:rgba(8,10,16,.62);border:1px solid rgba(255,90,120,.45);border-radius:1.4vh;padding:.6vh .7vh .7vh;min-width:20vh;user-select:none;touch-action:none}
+  #likers:hover{outline:1px dashed rgba(255,255,255,.5);outline-offset:2px}
+  #lkHead{font-size:1.35vh;font-weight:800;color:#ffb3c6;padding:0 .4vh .5vh;white-space:nowrap}
+  #lkList{display:flex;flex-direction:column;gap:.5vh}
+  #lkResize{position:absolute;right:-.6vh;bottom:-.6vh;width:1.8vh;height:1.8vh;border-radius:50%;background:#ff6b8f;cursor:nwse-resize;opacity:0;transition:opacity .2s}
+  #likers:hover #lkResize{opacity:1}
+  .lk{display:flex;align-items:center;gap:.8vh;background:rgba(255,255,255,.06);border-radius:99px;padding:.35vh 1vh .35vh .35vh}
+  .lk img{width:3.2vh;height:3.2vh;border-radius:50%;object-fit:cover;pointer-events:none}
+  .lkb{width:12vh}.lkn{font-size:1.25vh;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar{height:.7vh;border-radius:9px;background:rgba(255,255,255,.15);overflow:hidden;margin-top:.3vh}
   .bar i{display:block;height:100%;background:linear-gradient(90deg,#ff5f86,#ffb3c6);transition:width .4s}
-  .lk b{font-size:1.45vh;color:#ff9ab2}
+  .lk b{font-size:1.3vh;color:#ff9ab2}
   #banner{top:var(--split);left:50%;right:auto;transform:translate(-50%,-50%) scale(.85);opacity:0;transition:all .45s cubic-bezier(.2,.9,.3,1.2);
     display:flex;align-items:center;gap:1.2vh;padding:.8vh 2.4vh .8vh .8vh;border-radius:99px;background:rgba(10,12,20,.85);border:2px solid #ffcf4d;max-width:90vw}
   #banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -48,7 +54,7 @@
 <canvas id="c"></canvas>
 <div id="divider"></div>
 <div id="top" class="hud"><div id="title"></div><div id="legend"></div></div>
-<div id="likers"></div>
+<div id="likers"><div id="lkHead"></div><div id="lkList"></div><div id="lkResize" title="Kéo để đổi cỡ (hoặc lăn chuột)"></div></div>
 <div id="pump"><div class="t">❤️ BƠM ĐẦY MỰC ❤️</div><div id="pumpName"></div><div class="bar"><i id="pumpBar"></i></div></div>
 <div id="banner" class="hud"><img id="bAvatar" alt=""><div><div id="bName"></div><div id="bTier"></div></div></div>
 <div id="camLabel"></div>
