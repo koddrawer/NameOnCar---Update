@@ -35,9 +35,10 @@ let CFG = {
   voice: { enabled: true, volume: 1, write: {}, thank: {} },
   renderScale: 1,
   likeThreshold: 100,
+  join: { enabled: false, size: 0.09, speed: 1.8, maxQueue: 8, maxNames: 40, chime: false },
   likersBox: { show: true, x: 0.025, y: 0.2, scale: 0.75, rows: 3 },
 };
-const TIERS = ['like', 'small', 'big', 'silver', 'gold', 'logo'];
+const TIERS = ['like', 'small', 'big', 'silver', 'gold', 'logo', 'join'];
 
 // ================= RENDERER / SCENE =================
 const canvas = document.getElementById('c');
@@ -76,7 +77,7 @@ function renderHUD() {
   $('legend').innerHTML = (CFG.legend || []).filter(Boolean).map(l => `<span>${esc(l)}</span>`).join('');
   document.documentElement.style.setProperty('--split', (CFG.split * 100) + '%');
 }
-const TIER_LABEL = { like: '❤️ Bơm đầy mực', small: '🪙 Avatar nhỏ', big: '🪙 Avatar to', silver: '🥈 Mực bạc', gold: '🥇 Mực ánh vàng', logo: '👑 Logo cửa xe' };
+const TIER_LABEL = { like: '❤️ Bơm đầy mực', small: '🪙 Avatar nhỏ', big: '🪙 Avatar to', silver: '🥈 Mực bạc', gold: '🥇 Mực ánh vàng', logo: '👑 Logo cửa xe', join: '👋 Vào xem live' };
 function showBanner(job, carName) {
   const b = $('banner');
   if (!job) { b.classList.remove('show'); return; }
@@ -569,13 +570,14 @@ function occluded(car, eye, p) {
   const h = raycaster.intersectObjects(car.allMeshes, false)[0];
   return !!h && h.distance < dist - 0.04;
 }
-function pickCars() {
+function pickCars(near) {
+  if (near) { const d = c => carCenterW(c).setY(0).distanceTo(pov.feet); return activeCars().slice().sort((a, b) => d(a) - d(b) + (Math.random() - 0.5) * 2); }   // người vào xem: viết lên xe gần nhất cho đỡ đi xa
   const list = activeCars().slice().sort((a, b) => a.decals.length - b.decals.length + (Math.random() - 0.5) * 3);
   return list;
 }
-function findSlot(w, h) {
+function findSlot(w, h, near) {
   for (let round = 0; round < 5; round++) {
-    for (const car of pickCars()) for (const k of [1, 0.85, 0.7]) {
+    for (const car of pickCars(near)) for (const k of [1, 0.85, 0.7]) {
       const s = findSlotOnce(car, w * k, h * k, k === 1 ? 160 : 100);
       if (s) { s.scale = k; return s; }
     }
@@ -641,14 +643,17 @@ function disposeEntry(e) {
   e.mats.forEach(m => { m.map && m.map.dispose(); m.dispose(); });
 }
 function allDecals() { return cars.flatMap(c => c.decals); }
-function removeOldest() {
-  const all = allDecals(); if (!all.length) return false;
+function removeOldest(onlyJoin) {
+  const all = allDecals().filter(d => !onlyJoin || d.kind === 'join'); if (!all.length) return false;
   const e = all.reduce((a, b) => (a.t <= b.t ? a : b)); const car = e.car; car.decals.splice(car.decals.indexOf(e), 1);
   api.removeRecord && api.removeRecord(e.id);
   animate(0.8, k => e.mats.forEach(m => m.opacity = 1 - k)).then(() => disposeEntry(e));
   return true;
 }
-function enforceMax() { while (allDecals().length > CFG.maxNames) if (!removeOldest()) break; }
+function enforceMax() {
+  while (allDecals().filter(d => d.kind === 'join').length > (CFG.join.maxNames ?? 40)) if (!removeOldest(true)) break;
+  while (allDecals().length > CFG.maxNames) if (!removeOldest(allDecals().some(d => d.kind === 'join')) && !removeOldest()) break;   // xoá tên người vào xem trước
+}
 function clearAll() { cars.forEach(c => { c.decals.splice(0).forEach(disposeEntry); }); for (const k of Object.keys(logos)) { disposeEntry(logos[k]); delete logos[k]; } }
 function slotToLocal(s) { const c = s.car, m = c.group.matrixWorld.clone().invert(); return { car: c.def.id, scale: s.scale || 1, p: s.p.clone().applyMatrix4(m).toArray(), n: s.n.clone().transformDirection(m).toArray(), X: s.X.clone().transformDirection(m).toArray(), Y: s.Y.clone().transformDirection(m).toArray() }; }
 function slotFromLocal(o) {
@@ -787,14 +792,14 @@ function currentCam() { return { target: bot.target.toArray().map(v => +v.toFixe
 // ================= JOB RUNNER =================
 const AVATAR_T = { small: 1, big: 1, silver: 1, gold: 1 };
 function layout(job, fam) {
-  const th = CFG.sizes[job.type] || 0.14; const textC = makeTextCanvas(job.name, job.type, fam);
+  const th = job.type === 'join' ? (CFG.join.size || 0.09) : (CFG.sizes[job.type] || 0.14); const textC = makeTextCanvas(job.name, job.type, fam);
   let tw = th * textC.width / textC.height; let ah = AVATAR_T[job.type] ? th * (CFG.avatarScale[job.type] || 1) : 0;
   const gap = ah ? th * 0.15 : 0; let total = ah + gap + tw;
   const maxW = 1.5; if (total > maxW) { const k = maxW / total; tw *= k; ah *= k; total = maxW; }
   return { textC, tw, th: tw * textC.height / textC.width, ah, gap, total, boxH: Math.max(ah, tw * textC.height / textC.width) };
 }
 async function runJob(job) {
-  busy = true; current = job; updateQueueHUD(); pov.controlled = true; pov.speedMul = queue.length > 2 ? 1.7 : 1.15;
+  busy = true; current = job; updateQueueHUD(); pov.controlled = true; pov.speedMul = job.type === 'join' ? 1.6 : queue.length > 2 ? 1.7 : 1.15;
   try { if (job.type === 'logo') await runLogo(job); else await runWrite(job); } catch (e) { console.error(e); }
   pen.visible = false; stopScribble();
   pov.fovTarget = 0;
@@ -824,7 +829,7 @@ async function runWrite(job, instant = false, rec = null) {
   const img = await loadImg(job.avatar || initialsAvatar(job.name));
   INK_NOW = rec && rec.ink || CFG.inkColor;
   let L = layout(job, fam);
-  let slot = rec ? slotFromLocal(rec.slot) : findSlot(L.total, L.boxH);
+  let slot = rec ? slotFromLocal(rec.slot) : findSlot(L.total, L.boxH, job.type === 'join');
   if (!slot) { console.warn('Hết chỗ trên xe'); return; }
   const car = slot.car; const sc = slot.scale || 1;
   if (!rec) { INK_NOW = inkFor(car); L = layout(job, fam); }
@@ -859,7 +864,7 @@ async function runWrite(job, instant = false, rec = null) {
     });
     $('pump').classList.remove('show');
   }
-  const sp = 1 / Math.max(0.2, CFG.writeSpeed);
+  const sp = 1 / Math.max(0.2, CFG.writeSpeed * (job.type === 'join' ? (CFG.join.speed || 1.8) : 1));
   const first = L.ah ? surfacePoint(car, slot, L.ah, L.ah, 0.5, 0.97, avC) : surfacePoint(car, slot, L.tw, L.th, 0.06, 0.5, txC);
   await penInFromHand(first, slot.n, penScale);
   startScribble();
@@ -883,7 +888,7 @@ async function runWrite(job, instant = false, rec = null) {
   const p0 = pen.position.clone();
   await animate(0.45, k => { pen.position.copy(p0).addScaledVector(slot.n, k * 0.12).addScaledVector(V3(0, -1, 0), k * 0.15); });
   pen.visible = false;
-  chime(job.type);
+  if (job.type !== 'join' || CFG.join.chime) chime(job.type === 'join' ? 'like' : job.type);
   const bc = slot.p.clone().addScaledVector(slot.n, 0.03);
   if (INK[job.type]) burst(bc, slot.n, job.type === 'gold' ? 0xffcc44 : 0xe8eef8, job.type === 'gold' ? 140 : 90, Math.max(0.4, L.total * 0.7));
   else burst(bc, slot.n, 0xffffff, 40, Math.max(0.3, L.total * 0.5));
@@ -891,7 +896,7 @@ async function runWrite(job, instant = false, rec = null) {
   api.saveRecord && api.saveRecord(recOut);
   say(fillTpl(CFG.voice.thank[job.type], job));
   pov.lookTarget.copy(slot.p);
-  await wait(CFG.holdSeconds * 1000);
+  await wait((job.type === 'join' ? Math.min(0.6, CFG.holdSeconds) : CFG.holdSeconds) * 1000);
 }
 async function runLogo(job, instant = false, rec = null) {
   const fam = (rec && rec.font) || CFG.fonts.logo || 'Pacifico';
@@ -928,7 +933,15 @@ async function runLogo(job, instant = false, rec = null) {
 // ================= QUEUE =================
 function enqueue(job) {
   job.id = job.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
-  if (job.type !== 'like') { let i = queue.findIndex(j => j.type === 'like'); if (i < 0) i = queue.length; queue.splice(i, 0, job); } else queue.push(job);
+  if (job.type === 'join') {                       // người vào xem: luôn xếp cuối, giữ tối đa N người mới nhất
+    if (!CFG.join.enabled && !job.test) return;
+    queue.push(job);
+    const js = queue.filter(j => j.type === 'join'); const max = Math.max(1, CFG.join.maxQueue ?? 8);
+    for (let i = 0; i < js.length - max; i++) queue.splice(queue.indexOf(js[i]), 1);
+    updateQueueHUD(); report(); return;
+  }
+  { const i = queue.findIndex(j => j.type === 'join'); if (i >= 0 && job.type === 'like') { queue.splice(i, 0, job); updateQueueHUD(); report(); return; } }
+  if (job.type !== 'like') { let i = queue.findIndex(j => j.type === 'like' || j.type === 'join'); if (i < 0) i = queue.length; queue.splice(i, 0, job); } else queue.push(job);
   updateQueueHUD(); report();
 }
 function report() { api.status && api.status({ queue: queue.map(j => ({ type: j.type, name: j.name })), current: current && { type: current.type, name: current.name }, names: allDecals().length, logo: logoList().map(l => l.name).join(', ') }); }
@@ -959,7 +972,7 @@ function frame(now) {
 async function applyConfig(c) {
   const prevMusic = CFG.music && CFG.music.files; const prevCars = JSON.stringify(CFG.cars);
   const merged = { ...CFG, ...c };
-  for (const k of ['sizes', 'avatarScale', 'logo', 'fonts', 'pov', 'bot', 'music', 'voice', 'likersBox']) merged[k] = { ...CFG[k], ...(c[k] || {}) };
+  for (const k of ['sizes', 'avatarScale', 'logo', 'fonts', 'pov', 'bot', 'music', 'voice', 'likersBox', 'join']) merged[k] = { ...CFG[k], ...(c[k] || {}) };
   CFG = merged;
   for (const f of CFG.fontLib || []) if (f.url && !f._loaded) { try { const ff = new FontFace(f.family, `url("${f.url}")`); await ff.load(); document.fonts.add(ff); f._loaded = 1; } catch (e) { console.warn('font', f.family, e); } }
   for (const t of TIERS) try { await document.fonts.load(fontStr(64, CFG.fonts[t]), 'Ááằẫệ'); } catch (e) { }

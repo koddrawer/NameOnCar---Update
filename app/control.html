@@ -87,7 +87,7 @@
   <div class="tests">
     <button data-test="likes">❤️ +25 tim</button><button data-test="like">❤️ Đủ 100 tim</button><button data-test="small">🪙 1 xu</button>
     <button data-test="big">🪙 5 xu</button><button data-test="silver">🥈 10 xu</button><button data-test="gold">🥇 30 xu</button>
-    <button data-test="logo">👑 100 xu</button><button id="prevLogo">👁 Xem vị trí logo</button><button data-cmd="clearQueue">⏹ Xoá hàng chờ</button>
+    <button data-test="logo">👑 100 xu</button><button data-test="join">👋 Người vào xem</button><button id="prevLogo">👁 Xem vị trí logo</button><button data-cmd="clearQueue">⏹ Xoá hàng chờ</button>
   </div>
 </section>
 <section>
@@ -160,6 +160,15 @@
   <div class="row"><label><input type="checkbox" data-k="likersBox.show"> Hiện bảng</label><small>Kéo bảng trên màn LIVE để di chuyển; kéo chấm hồng ở góc hoặc lăn chuột để đổi cỡ.</small></div>
   <div class="row"><label>Cỡ bảng</label><input type="range" min="0.35" max="2.5" step="0.05" data-k="likersBox.scale"><span class="val" data-v="likersBox.scale"></span></div>
   <div class="row"><label>Số người hiện</label><input type="number" min="1" max="10" data-k="likersBox.rows"><button id="lkReset">↺ Đặt lại vị trí</button></div>
+</section>
+<section>
+  <h2>👋 Viết tên người vào xem live</h2>
+  <div class="row"><label><input type="checkbox" data-k="join.enabled"> Bật</label><label><input type="checkbox" data-k="join.once"> Mỗi người chỉ viết 1 lần / phiên</label><label><input type="checkbox" data-k="join.chime"> Có tiếng chuông</label></div>
+  <div class="row"><label>Cỡ chữ (m)</label><input type="range" min="0.05" max="0.25" step="0.005" data-k="join.size"><span class="val" data-v="join.size"></span></div>
+  <div class="row"><label>Tốc độ viết (× so với thường)</label><input type="range" min="0.5" max="4" step="0.1" data-k="join.speed"><span class="val" data-v="join.speed"></span></div>
+  <div class="row"><label>Giữ tối đa người chờ</label><input type="number" min="1" max="50" data-k="join.maxQueue"><small>Đông người vào thì chỉ viết N người mới nhất</small></div>
+  <div class="row"><label>Tối đa tên người xem trên xe</label><input type="number" min="0" max="300" data-k="join.maxNames"><small>Đầy thì xoá tên người xem cũ nhất (không đụng tên người tặng quà)</small></div>
+  <small>Font chọn ở dòng "👋 Vào xem" phía trên. Tên người xem luôn viết sau quà và tim, lên xe gần nhất cho đỡ đi xa. Giọng đọc: tab Nhạc & Giọng, dòng 👋 (để trống = im lặng).</small>
 </section>
 <section>
   <h2>Mực & cỡ chữ</h2>

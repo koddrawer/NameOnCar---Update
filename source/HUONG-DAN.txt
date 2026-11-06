@@ -40,3 +40,8 @@ BẢN 1.3
 - Kết nối Euler Stream WebSocket (tab LIVE → Cách kết nối): dán API key từ eulerstream.com.
   Tự nối lại theo mã lỗi: hết thời lượng → nối ngay; rớt mạng → 2s, 4s, 8s…; chưa LIVE → thử lại mỗi 20s;
   sai key/không có quyền → dừng và báo lỗi. Ping mỗi 20s, im lặng quá N giây thì tự nối lại. Quà trùng sau khi nối lại bị bỏ qua.
+
+BẢN 1.3.1
+- Viết tên người vào xem live: tab Chữ & Font → "👋 Viết tên người vào xem live" (mặc định TẮT).
+  Chỉnh cỡ chữ, tốc độ, số người chờ tối đa, số tên người xem tối đa trên xe; font ở dòng "👋 Vào xem".
+  Luôn viết sau quà và tim; xe đầy thì xoá tên người xem cũ trước, không đụng tên người tặng quà.

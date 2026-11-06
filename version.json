@@ -1,11 +1,11 @@
 {
-  "version": "1.3.0",
+  "version": "1.3.1",
   "minBase": "1.1.0",
-  "notes": "1.3.0: Euler Stream WebSocket + tự nối lại, popup đếm tim kéo/đổi cỡ, chế độ 1080x1920, logo 2 cửa, bỏ nóc xe, font graffiti",
+  "notes": "1.3.1: viết tên người vào xem live (bật/tắt, cỡ chữ, font)",
   "files": [
     {
       "path": "core.js",
-      "sha256": "e8d752fba844971ca6322a6b0511303221f1929a8e02baa86aad6b9090afcfe9"
+      "sha256": "89b2cf5db9f9c8bb31e036339ef92c3c1629d0d2f192d25dde32455149d9cd17"
     },
     {
       "path": "preload.js",
@@ -17,15 +17,15 @@
     },
     {
       "path": "control.html",
-      "sha256": "4fb9f0d3d6ea65c143805e74fb5c851358d774d18798ee2b9bfb4747c1c644ee"
+      "sha256": "21c0425aaa9f398915ed997ae343417420b86f011b369ff05a7b24e4e42eb32a"
     },
     {
       "path": "control.js",
-      "sha256": "21d6048de63efbc531354b9212e66db293ba6275d979263d2c50a7785e15ebca"
+      "sha256": "b3efbb9030dff3e6e2f67102b19a1fe7a645c69bbae183833338e6db7eed4ea0"
     },
     {
       "path": "dist/display.bundle.js",
-      "sha256": "d926eef14128252b63bdf3c60c0c936e77aa08e8abd3b77d8977e7097262ff38"
+      "sha256": "2a8831c614e3c2bd36aa3b0fd618c0e5e40d71aef2e2e32ea77930e7765a637d"
     },
     {
       "path": "assets.json",

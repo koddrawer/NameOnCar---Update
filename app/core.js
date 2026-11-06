@@ -24,7 +24,8 @@ const DEFAULTS = {
   tiers: { small: 1, big: 5, silver: 10, gold: 30, logo: 100 },
   title: 'KÝ TÊN LÊN XE',
   legend: ['❤️ 100 tim: bơm mực, ký tên', '🪙 1 xu: avatar nhỏ', '🪙 5 xu: avatar to', '🥈 10 xu: mực bạc', '🥇 30 xu: mực vàng', '👑 100 xu: logo cửa xe'],
-  fonts: { like: 'Dancing Script', small: 'Pacifico', big: 'Lobster', silver: 'Great Vibes', gold: 'Dancing Script', logo: 'Pacifico' },
+  fonts: { like: 'Dancing Script', small: 'Pacifico', big: 'Lobster', silver: 'Great Vibes', gold: 'Dancing Script', logo: 'Pacifico', join: 'Patrick Hand' },
+  join: { enabled: false, size: 0.09, speed: 1.8, maxQueue: 8, maxNames: 40, onlyIdle: true, once: true, chime: false },
   userFonts: [],
   inkColor: '#111111', autoInk: true, inkLight: '#f4f1e8',
   sizes: { like: 0.13, small: 0.15, big: 0.19, silver: 0.21, gold: 0.24 },
@@ -165,6 +166,16 @@ function onGift(d) {
   const tier = tierFor(coins);
   if (tier) pushJob(tier, user, { coins, gift: giftName });
 }
+// người vào xem live
+const joined = new Set();
+function onJoin(d) {
+  touch();
+  if (!config.join || !config.join.enabled) return;
+  const msgId = d.common?.msgId || d.msgId; if (msgId && dup('j' + msgId)) return;
+  const u = normUser(d); if (!u.id && !u.name) return;
+  if (config.join.once !== false) { if (joined.has(u.id || u.name)) return; joined.add(u.id || u.name); }
+  send(displayWin, 'job', { type: 'join', name: u.name || u.id, uniqueId: u.id, avatar: '' });
+}
 function onLike(d) {
   touch('like');
   const msgId = d.common?.msgId || d.msgId; if (msgId && dup('l' + msgId)) return;
@@ -244,6 +255,7 @@ function openEuler(username, myGen) {
           if (/GiftMessage$/.test(type)) onGift(data);
           else if (/LikeMessage$/.test(type)) onLike(data);
           else if (/RoomUserSeqMessage$/.test(type)) onViewers(data);
+          else if (/MemberMessage$/.test(type)) onJoin(data);
           else if (type === 'room.status') { touch(); if (data.state === 'ended' || data.state === 'offline') log('ℹ️ Euler: phòng ' + data.state); else if (data.state === 'reconnecting') log(`ℹ️ Euler đang nối lại TikTok (lần ${data.attempt || '?'})`); }
           else if (type === 'tiktok.disconnect') log('ℹ️ Euler: TikTok ngắt (' + (CLOSE_TEXT[data.reason] || data.reason) + ')');
           else if (type) touch();
@@ -274,7 +286,8 @@ async function openConnector(username, myGen) {
     c.on(EV.GIFT || 'gift', d => myGen === gen && onGift(d));
     c.on(EV.LIKE || 'like', d => myGen === gen && onLike(d));
     c.on(EV.ROOM_USER || 'roomUser', d => myGen === gen && onViewers(d));
-    for (const ev of [EV.CHAT || 'chat', EV.MEMBER || 'member', EV.SOCIAL || 'social']) c.on(ev, () => myGen === gen && touch());
+    c.on(EV.MEMBER || 'member', d => myGen === gen && onJoin(d));
+    for (const ev of [EV.CHAT || 'chat', EV.SOCIAL || 'social']) c.on(ev, () => myGen === gen && touch());
     c.on(EV.STREAM_END || 'streamEnd', () => { if (myGen !== gen) return; closeCurrent(); scheduleReconnect(4005, 'Phiên LIVE đã kết thúc'); });
     c.on(EV.DISCONNECTED || 'disconnected', () => { if (myGen !== gen) return; closeCurrent(); scheduleReconnect(1006, 'Mất kết nối TikTok'); });
     c.on('error', e => { if (myGen === gen) CS.lastError = String(e?.message || e?.info || e).slice(0, 200); });
@@ -294,7 +307,7 @@ async function openConnector(username, myGen) {
 async function connectTikTok(username) {
   username = String(username || '').replace(/^https?:\/\/(www\.)?tiktok\.com\//, '').replace(/\/live.*$/, '').replace(/^@/, '').trim();
   if (!username) return { ok: false, error: 'Chưa nhập username' };
-  config.tiktokUser = username; saveConfig(); wantUser = username; clearTimeout(reTimer);
+  config.tiktokUser = username; saveConfig(); wantUser = username; clearTimeout(reTimer); joined.clear();
   return openConnection(username, false);
 }
 async function disconnectTikTok() { wantUser = ''; clearTimeout(reTimer); closeCurrent(); setState('off'); }
@@ -469,6 +482,7 @@ ipcMain.handle('test', async (e, { type, name }) => {
   const n = name || TEST_NAMES[Math.floor(Math.random() * TEST_NAMES.length)];
   const id = 'test_' + n;
   if (type === 'likes') { await addLikes({ id, name: n, avatar: '' }, 25); return; }
+  if (type === 'join') { send(displayWin, 'job', { type: 'join', test: true, name: name || n + ' ' + Math.floor(Math.random() * 99), uniqueId: id, avatar: '' }); log('→ JOIN (thử)'); return; }
   pushJob(type, { id, name: n, avatar: '' }, { coins: config.tiers[type] || 0, gift: TEST_GIFTS[type] || 'quà' });
 });
 ipcMain.handle('pickFonts', async () => {

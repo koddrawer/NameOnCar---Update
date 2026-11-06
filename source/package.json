@@ -1,6 +1,6 @@
 {
   "name": "car-sign-live",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Ký tên người xem lên xe 3D cho TikTok LIVE",
   "main": "main.js",
   "scripts": {

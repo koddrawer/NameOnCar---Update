@@ -2,7 +2,7 @@ const A = window.api;
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let cfg = {}, fontLib = [];
-const TIERS = [['like', '❤️ Tim'], ['small', '🪙 1 xu'], ['big', '🪙 5 xu'], ['silver', '🥈 Bạc'], ['gold', '🥇 Vàng'], ['logo', '👑 Logo']];
+const TIERS = [['like', '❤️ Tim'], ['small', '🪙 1 xu'], ['big', '🪙 5 xu'], ['silver', '🥈 Bạc'], ['gold', '🥇 Vàng'], ['logo', '👑 Logo'], ['join', '👋 Vào xem']];
 const get = (o, k) => k.split('.').reduce((a, p) => a && a[p], o);
 function patchFor(k, v) { const parts = k.split('.'); const o = {}; let cur = o; parts.forEach((p, i) => { if (i === parts.length - 1) cur[p] = v; else cur = cur[p] = {}; }); return o; }
 let pending = {}, timer = null;
