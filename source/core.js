@@ -336,7 +336,10 @@ function ensureAssets() {
     for (let i = 0; i < ASSETS.length; i++) {
       const a = ASSETS[i]; const dst = path.join(ASSET_DIR, a.file);
       const dev = path.join(__dirname, 'assets', a.file);           // khi chạy mã nguồn
-      if (fs.existsSync(dev)) { const up = dev.replace(/app\.asar([\\/])/, 'app.asar.unpacked$1'); out[a.file] = up !== dev && fs.existsSync(up) ? up : dev; continue; }   // model có sẵn trong bộ cài
+      if (fs.existsSync(dev)) {   // model có sẵn trong bộ cài: chỉ dùng nếu đúng bản mới nhất (đúng mã kiểm tra)
+        const up = dev.replace(/app\.asar([\\/])/, 'app.asar.unpacked$1'); const f = up !== dev && fs.existsSync(up) ? up : dev;
+        try { if (sha256(fs.readFileSync(f)) === a.sha256) { out[a.file] = f; continue; } } catch (e) { }
+      }
       if (idx[a.file] === a.sha256 && fs.existsSync(dst) && fs.statSync(dst).size === a.size) { out[a.file] = dst; continue; }
       try {
         const label = `${i + 1}/${ASSETS.length} ${a.label || a.file} (${(a.size / 1048576).toFixed(1)} MB)`;

@@ -1,11 +1,11 @@
 {
-  "version": "1.4.1",
+  "version": "1.4.2",
   "minBase": "1.1.0",
-  "notes": "1.4.1: bộ cài đầy đủ (kèm sẵn model xe + font)",
+  "notes": "1.4.2: sửa kính đèn hậu BMW X3 bị lệch ra ngoài",
   "files": [
     {
       "path": "core.js",
-      "sha256": "7a29b3d807a3398d6060816b429d1ac3857cc4708354a8b083c1925d35f98839"
+      "sha256": "422700360e022bed80830751efa74b841a724fda397fc4ac299d2ec62de94a4c"
     },
     {
       "path": "preload.js",
@@ -29,7 +29,7 @@
     },
     {
       "path": "assets.json",
-      "sha256": "72a09914d31b6a2655eabc8feda35f8f0816812fcb6ab6bb1e6956613594cfa4"
+      "sha256": "34eba96a2b987a535a63a3394745ec588f536b1fc3cec55b5375a854dab08ed3"
     },
     {
       "path": "fonts/fonts.css",

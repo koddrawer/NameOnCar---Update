@@ -51,3 +51,6 @@ BẢN 1.4.0 — ĐỒ HOẠ
 - Sơn xe phản chiếu chính showroom (dải đèn trần) thay vì môi trường giả.
 - Tab Hệ thống → "Chất lượng đồ hoạ": Thấp / Vừa / Cao / Rất cao; chỉnh độ bóng sàn và độ nhoè phản chiếu.
   GTX 1050: Cao + độ nét 0.75; nếu giật dùng Vừa (tắt phản chiếu, giữ bóng đổ).
+
+BẢN 1.4.2
+- Sửa lỗi model BMW X3: kính đèn hậu bên phải bị lệch ra ngoài thân xe (lỗi sẵn trong model gốc).
