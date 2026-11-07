@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import * as GFX from './gfx.js';
 import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -35,6 +36,7 @@ let CFG = {
   voice: { enabled: true, volume: 1, write: {}, thank: {} },
   renderScale: 1,
   likeThreshold: 100,
+  gfx: { quality: 'high', reflect: 0.32, blur: 1.5 },
   join: { enabled: false, size: 0.09, speed: 1.8, maxQueue: 8, maxNames: 40, chime: false },
   likersBox: { show: true, x: 0.025, y: 0.2, scale: 0.75, rows: 3 },
 };
@@ -53,9 +55,10 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0c10);
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.85;
-scene.add(new THREE.HemisphereLight(0xeef2ff, 0x2a2a30, 0.7));
-const key = new THREE.DirectionalLight(0xffffff, 1.3); key.position.set(4, 10, 6); scene.add(key);
-const fill = new THREE.DirectionalLight(0xcfe0ff, 0.6); fill.position.set(-6, 8, -5); scene.add(fill);
+scene.add(new THREE.HemisphereLight(0xeef2ff, 0x2a2a30, 0.45));
+GFX.initGfx(renderer, scene, 'high');
+const fill = new THREE.DirectionalLight(0xcfe0ff, 0.35); fill.position.set(-6, 8, -5); scene.add(fill);
+let GFX_Q = 'high';
 
 const camTop = new THREE.PerspectiveCamera(58, 1, 0.03, 120); camTop.layers.enable(1);
 const camBot = new THREE.PerspectiveCamera(40, 1, 0.05, 200);
@@ -63,7 +66,7 @@ const camBot = new THREE.PerspectiveCamera(40, 1, 0.05, 200);
 // ================= STATE =================
 const cars = [];                 // {def, group, inner, decalGroup, paintMeshes, paintSet, allMeshes, lbPaint, lbAll, decals:[]}
 const carById = id => cars.find(c => c.def.id === id);
-let showroom = null, roomHalf = 13.2;
+let showroom = null, roomHalf = 13.2, floorY = 0;
 const logos = {};                 // side (1 | -1) -> decal logo; in cửa này trước rồi sang cửa kia
 const logoList = () => Object.values(logos);
 const queue = []; let busy = false; let current = null; let ready = false;
@@ -294,14 +297,25 @@ async function loadShowroom(url) {
     root.traverse(o => {
       if (!o.isMesh) return; const m = o.material;
       if (/light/i.test(m.name)) { m.emissive = new THREE.Color(0xffffff); m.emissiveIntensity = 1.2; m.toneMapped = true; }
-      if (/^material\.006$/i.test(m.name)) { m.color.setRGB(0.035, 0.037, 0.045); m.roughness = 0.18; m.metalness = 0.55; m.envMapIntensity = 0.45; }
+      if (/^material\.006$/i.test(m.name) && o.geometry.attributes.position.count <= 8) { m.side = THREE.FrontSide; m.color.setRGB(0.022, 0.023, 0.027); m.roughness = 0.38; m.metalness = 0.0; m.envMapIntensity = 0.1; o.receiveShadow = true; }   // tấm sàn tối (chỉ mặt trên, để gương nhìn từ dưới không bị che)   // sàn đá bóng: phần phản chiếu do gương phẳng lo
       if (/^wall$/i.test(m.name)) { m.color.multiplyScalar(0.55); m.envMapIntensity = 0.3; }
     });
     scene.add(root); root.updateMatrixWorld(true);
     const b = new THREE.Box3().setFromObject(root); roomHalf = Math.min(b.max.x - b.min.x, b.max.z - b.min.z) / 2 - 1.0;
     showroom = root;
+    GFX.prepShowroom(root);
+    try { scene.environment = GFX.showroomEnvironment(root, b); scene.environmentIntensity = 1.0; } catch (e) { console.warn('env', e); }
+    // sàn / tường: tự gán envMap để chỉnh được cường độ (envMapIntensity chỉ có tác dụng với envMap riêng)
+    root.traverse(o => { if (!o.isMesh) return; const m = o.material;
+      if (/^material\.006$/i.test(m.name) && o.geometry.attributes.position.count <= 8) { m.envMap = scene.environment; m.envMapIntensity = 0.05; m.needsUpdate = true; }
+      if (/^wall$/i.test(m.name)) { m.envMap = scene.environment; m.envMapIntensity = 0.3; m.needsUpdate = true; } });
+    // đo độ cao mặt sàn thật (sàn model có thể không nằm ở y=0)
+    // mặt sàn = mặt phẳng nằm ngang lớn nhất thấp nhất -> lấy mặt cao nhất trong số đó
+    floorY = 0; root.traverse(o => { if (!o.isMesh) return; o.geometry.computeBoundingBox(); const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld);
+      if (bb.max.y - bb.min.y < 0.05 && bb.max.y < 0.3 && (bb.max.x - bb.min.x) * (bb.max.z - bb.min.z) > 50) floorY = Math.max(floorY, bb.max.y); });
+    GFX.addFloorMirror(Math.max(b.max.x - b.min.x, b.max.z - b.min.z), floorY + 0.0015);
     // vài đèn điểm trên trần cho có điểm sáng
-    for (const [x, z] of [[-6, -6], [6, -6], [-6, 6], [6, 6], [0, 0]]) { const l = new THREE.PointLight(0xfff4e6, 7, 12, 2); l.position.set(x, b.max.y - 0.4, z); scene.add(l); }
+    for (const [x, z] of [[-6, -6], [6, -6], [-6, 6], [6, 6], [0, 0]]) { const l = new THREE.PointLight(0xfff4e6, 4, 12, 2); l.position.set(x, b.max.y - 0.4, z); scene.add(l); }
   } catch (e) { console.warn('showroom', e); fallbackFloor(); }
 }
 function fallbackFloor() {
@@ -337,16 +351,19 @@ async function loadCar(def, url) {
   const lbAll = new THREE.Box3(); visible.forEach(o => lbAll.expandByObject(o));
   const car = { def, group, inner, decalGroup, paintMeshes: pm, paintSet: new Set(pm), allMeshes: visible, lbPaint, lbAll, decals: [] };
   pm.forEach(o => (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => { if (!m.userData.orig) m.userData.orig = m.color.clone(); }));
+  GFX.prepCar(group);
   cars.push(car); return car;
 }
 function applyLayout() {
   for (const c of cars) {
     const d = CFG.cars.find(x => x.id === c.def.id) || c.def; c.def = d;
-    c.group.position.set(d.x || 0, 0, d.z || 0); c.group.rotation.y = THREE.MathUtils.degToRad(d.rot || 0);
+    c.group.position.set(d.x || 0, floorY, d.z || 0); c.group.rotation.y = THREE.MathUtils.degToRad(d.rot || 0);
     c.group.visible = d.enabled !== false; c.group.updateMatrixWorld(true);
     c.paintMeshes.forEach(o => (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.color.copy(d.color ? new THREE.Color(d.color) : m.userData.orig)));
   }
   buildGrid(); _lrKey = '';
+  for (const c of cars) if (!c.contact) GFX.bakeContactShadow(c);
+  GFX.shadowsDirty();
 }
 const activeCars = () => cars.filter(c => c.group.visible);
 const carCenterW = c => c.lbPaint.getCenter(V3()).applyMatrix4(c.group.matrixWorld);
@@ -623,7 +640,7 @@ function buildDecal(car, slot, center, w, h, tex, kind) {
     const g = new DecalGeometry(m, center, euler, size);
     if (g.attributes.position.count === 0) { g.dispose(); continue; }
     g.applyMatrix4(inv);
-    const dm = new THREE.Mesh(g, mat); dm.renderOrder = 2; group.add(dm);
+    const dm = new THREE.Mesh(g, mat); dm.renderOrder = 2; dm.receiveShadow = true; group.add(dm);
   }
   car.decalGroup.add(group); return { group, mat };
 }
@@ -962,8 +979,8 @@ function frame(now) {
   const W = window.innerWidth, H = window.innerHeight, hTop = Math.round(H * CFG.split);
   camTop.aspect = W / Math.max(1, hTop); camTop.updateProjectionMatrix();
   camBot.aspect = W / Math.max(1, H - hTop); camBot.updateProjectionMatrix();
-  if (hTop > 0) { renderer.setViewport(0, H - hTop, W, hTop); renderer.setScissor(0, H - hTop, W, hTop); renderer.render(scene, camTop); }
-  if (H - hTop > 0) { renderer.setViewport(0, 0, W, H - hTop); renderer.setScissor(0, 0, W, H - hTop); renderer.render(scene, camBot); }
+  if (hTop > 0) { GFX.renderReflection(camTop); renderer.setViewport(0, H - hTop, W, hTop); renderer.setScissor(0, H - hTop, W, hTop); renderer.render(scene, camTop); }
+  if (H - hTop > 0) { GFX.renderReflection(camBot); renderer.setViewport(0, 0, W, H - hTop); renderer.setScissor(0, 0, W, H - hTop); renderer.render(scene, camBot); }
   if (!busy && ready && queue.length) runJob(queue.shift());
   requestAnimationFrame(frame);
 }
@@ -972,10 +989,11 @@ function frame(now) {
 async function applyConfig(c) {
   const prevMusic = CFG.music && CFG.music.files; const prevCars = JSON.stringify(CFG.cars);
   const merged = { ...CFG, ...c };
-  for (const k of ['sizes', 'avatarScale', 'logo', 'fonts', 'pov', 'bot', 'music', 'voice', 'likersBox', 'join']) merged[k] = { ...CFG[k], ...(c[k] || {}) };
+  for (const k of ['sizes', 'avatarScale', 'logo', 'fonts', 'pov', 'bot', 'music', 'voice', 'likersBox', 'join', 'gfx']) merged[k] = { ...CFG[k], ...(c[k] || {}) };
   CFG = merged;
   for (const f of CFG.fontLib || []) if (f.url && !f._loaded) { try { const ff = new FontFace(f.family, `url("${f.url}")`); await ff.load(); document.fonts.add(ff); f._loaded = 1; } catch (e) { console.warn('font', f.family, e); } }
   for (const t of TIERS) try { await document.fonts.load(fontStr(64, CFG.fonts[t]), 'Ááằẫệ'); } catch (e) { }
+  if (CFG.gfx) { if (CFG.gfx.quality && CFG.gfx.quality !== GFX_Q) { GFX_Q = CFG.gfx.quality; GFX.setQuality(GFX_Q); } GFX.setReflect(CFG.gfx.reflect ?? 0.32, CFG.gfx.blur ?? 1.5); }
   renderHUD(); resize(); applyMusic(prevMusic); placeLikers(); setLikers(lastLikers);
   if (cars.length && JSON.stringify(CFG.cars) !== prevCars) applyLayout();
   if (c.bot && (c.bot.mode !== undefined || c.bot.preset !== undefined || c.bot.car !== undefined)) { bot.manual = false; bot.cycleT = 0; bot.cycleI = CFG.bot.preset || 0; bot.label = ''; }
@@ -1018,6 +1036,6 @@ on('onAssetProgress', p => { const el = $('loading'); if (el) el.textContent = p
   $('loading') && $('loading').remove();
   ready = true; report();
   requestAnimationFrame(frame);
-  window.__dbg = { camTop, camBot, pov, renderer, get split() { return CFG.split; } };
+  window.__dbg = { cars, scene, camTop, camBot, pov, renderer, get split() { return CFG.split; } };
   if (window.__DTCAP) window.__test = { renderer, scene, camTop, camBot, enqueue, cars, queue, get busy() { return busy; }, CFG, pov, bot, findPath };
 })();

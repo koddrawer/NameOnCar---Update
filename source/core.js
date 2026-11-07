@@ -25,6 +25,7 @@ const DEFAULTS = {
   title: 'KÝ TÊN LÊN XE',
   legend: ['❤️ 100 tim: bơm mực, ký tên', '🪙 1 xu: avatar nhỏ', '🪙 5 xu: avatar to', '🥈 10 xu: mực bạc', '🥇 30 xu: mực vàng', '👑 100 xu: logo cửa xe'],
   fonts: { like: 'Dancing Script', small: 'Pacifico', big: 'Lobster', silver: 'Great Vibes', gold: 'Dancing Script', logo: 'Pacifico', join: 'Patrick Hand' },
+  gfx: { quality: 'high', reflect: 0.32, blur: 1.5 },
   join: { enabled: false, size: 0.09, speed: 1.8, maxQueue: 8, maxNames: 40, onlyIdle: true, once: true, chime: false },
   userFonts: [],
   inkColor: '#111111', autoInk: true, inkLight: '#f4f1e8',

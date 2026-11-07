@@ -7,7 +7,7 @@ notes = sys.argv[2] if len(sys.argv) > 2 else ''
 min_base = sys.argv[3] if len(sys.argv) > 3 else '1.1.0'
 APP_FILES = ['core.js', 'preload.js', 'display.html', 'control.html', 'control.js', 'dist/display.bundle.js', 'assets.json', 'fonts/fonts.css', 'fonts/fonts.json'] \
     + sorted(os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(ROOT, 'fonts/files/*.woff2')))
-SRC_FILES = ['main.js', 'core.js', 'preload.js', 'display.html', 'control.html', 'control.js', 'src/display.js', 'assets.json',
+SRC_FILES = ['main.js', 'core.js', 'preload.js', 'display.html', 'control.html', 'control.js', 'src/display.js', 'src/gfx.js', 'assets.json',
              'package.json', 'package-lock.json', 'HUONG-DAN.txt', 'scripts/release.py', 'scripts/optimize-car.mjs']
 version = json.load(open(os.path.join(ROOT, 'package.json')))['version']
 shutil.rmtree(os.path.join(repo, 'app'), ignore_errors=True)

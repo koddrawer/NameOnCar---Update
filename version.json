@@ -1,11 +1,11 @@
 {
-  "version": "1.3.1",
+  "version": "1.4.0",
   "minBase": "1.1.0",
-  "notes": "1.3.1: viết tên người vào xem live (bật/tắt, cỡ chữ, font)",
+  "notes": "1.4.0: bóng đổ, bóng gầm xe, phản chiếu sàn, phản xạ showroom trên sơn, chọn chất lượng đồ hoạ",
   "files": [
     {
       "path": "core.js",
-      "sha256": "89b2cf5db9f9c8bb31e036339ef92c3c1629d0d2f192d25dde32455149d9cd17"
+      "sha256": "50b8077f6d175199e0097081129b57189c5db5f2f6efb009c655e8d44fdb7b44"
     },
     {
       "path": "preload.js",
@@ -17,7 +17,7 @@
     },
     {
       "path": "control.html",
-      "sha256": "21c0425aaa9f398915ed997ae343417420b86f011b369ff05a7b24e4e42eb32a"
+      "sha256": "52aa3a72c46093e437ae9ff179bfc4d69614a3f1ab0fd0979446c29c9041c8d7"
     },
     {
       "path": "control.js",
@@ -25,7 +25,7 @@
     },
     {
       "path": "dist/display.bundle.js",
-      "sha256": "2a8831c614e3c2bd36aa3b0fd618c0e5e40d71aef2e2e32ea77930e7765a637d"
+      "sha256": "9311d82efb20862ff5f6be19369f382ab1eecb06833b3413744fad480e30b76c"
     },
     {
       "path": "assets.json",

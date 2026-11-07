@@ -45,3 +45,9 @@ BẢN 1.3.1
 - Viết tên người vào xem live: tab Chữ & Font → "👋 Viết tên người vào xem live" (mặc định TẮT).
   Chỉnh cỡ chữ, tốc độ, số người chờ tối đa, số tên người xem tối đa trên xe; font ở dòng "👋 Vào xem".
   Luôn viết sau quà và tim; xe đầy thì xoá tên người xem cũ trước, không đụng tên người tặng quà.
+
+BẢN 1.4.0 — ĐỒ HOẠ
+- Bóng đổ từ đèn trần + bóng mềm sát gầm từng xe; phản chiếu xe và trần đèn trên sàn đá bóng.
+- Sơn xe phản chiếu chính showroom (dải đèn trần) thay vì môi trường giả.
+- Tab Hệ thống → "Chất lượng đồ hoạ": Thấp / Vừa / Cao / Rất cao; chỉnh độ bóng sàn và độ nhoè phản chiếu.
+  GTX 1050: Cao + độ nét 0.75; nếu giật dùng Vừa (tắt phản chiếu, giữ bóng đổ).

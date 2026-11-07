@@ -222,7 +222,11 @@
 <!-- ============ HỆ THỐNG ============ -->
 <div class="tab" id="t-sys">
 <section>
-  <h2>Hiệu năng</h2>
+  <h2>Đồ hoạ & hiệu năng</h2>
+  <div class="row"><label>Chất lượng đồ hoạ</label><select data-k="gfx.quality"><option value="low">Thấp — chỉ bóng mềm dưới gầm (máy yếu)</option><option value="medium">Vừa — + bóng đổ từ đèn trần</option><option value="high">Cao — + phản chiếu xe trên sàn</option><option value="ultra">Rất cao — phản chiếu nét, bóng 4K</option></select></div>
+  <div class="row"><label>Độ bóng sàn (phản chiếu)</label><input type="range" min="0" max="0.8" step="0.02" data-k="gfx.reflect"><span class="val" data-v="gfx.reflect"></span></div>
+  <div class="row"><label>Độ nhoè phản chiếu</label><input type="range" min="0" max="4" step="0.1" data-k="gfx.blur"><span class="val" data-v="gfx.blur"></span></div>
+  <small>Phản chiếu sàn (mức Cao trở lên) tốn thêm GPU nhiều nhất. GTX 1050: dùng "Cao" + độ nét 0.75, nếu vẫn giật thì "Vừa".</small>
   <div class="row"><label>Độ nét render</label><select data-k="renderScale" data-num="1"><option value="0.75">0.75 (máy yếu)</option><option value="1">1.0</option><option value="1.5">1.5</option><option value="2">2.0 (GPU mạnh)</option></select></div>
 </section>
 <section>
