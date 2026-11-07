@@ -1,11 +1,11 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.1",
   "minBase": "1.1.0",
-  "notes": "1.4.0: bóng đổ, bóng gầm xe, phản chiếu sàn, phản xạ showroom trên sơn, chọn chất lượng đồ hoạ",
+  "notes": "1.4.1: bộ cài đầy đủ (kèm sẵn model xe + font)",
   "files": [
     {
       "path": "core.js",
-      "sha256": "50b8077f6d175199e0097081129b57189c5db5f2f6efb009c655e8d44fdb7b44"
+      "sha256": "7a29b3d807a3398d6060816b429d1ac3857cc4708354a8b083c1925d35f98839"
     },
     {
       "path": "preload.js",

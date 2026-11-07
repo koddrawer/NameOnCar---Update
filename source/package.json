@@ -1,6 +1,6 @@
 {
   "name": "car-sign-live",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Ký tên người xem lên xe 3D cho TikTok LIVE",
   "main": "main.js",
   "scripts": {
@@ -34,7 +34,9 @@
       "control.html",
       "control.js",
       "dist/display.bundle.js",
-      "car.glb",
+      "assets.json",
+      "fonts/**",
+      "assets/*.glb",
       "package.json"
     ],
     "win": {
@@ -48,7 +50,7 @@
       "output": "release"
     },
     "asarUnpack": [
-      "car.glb"
+      "assets/*.glb"
     ]
   }
 }
